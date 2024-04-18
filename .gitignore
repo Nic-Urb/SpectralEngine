@@ -1,0 +1,10 @@
+# Spectral Engine
+# .gitignore
+
+# Binaries
+bin/
+
+
+# Xcode files and folder
+*.xcworkspace/
+**.xcodeproj/
