@@ -46,7 +46,6 @@ private:
     SceneState m_CurrentState = SceneState::Edit;
     
 private:
-    void DrawMenuBar();
     void DrawToolbar();
     
     void OnRuntimeStart();

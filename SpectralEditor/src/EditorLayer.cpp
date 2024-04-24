@@ -49,9 +49,36 @@ void EditorLayer::OnUpdate(Spectral::Timestep ts)
 
 void EditorLayer::OnImGuiRender() 
 {
+    // create a docking space
+    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+    
     if (ImGui::BeginMainMenuBar())
     {
-        DrawMenuBar();
+        if (ImGui::BeginMenu("File")) {
+            // OpenFile()
+            ImGui::EndMenu();
+        }
+        
+        if (ImGui::BeginMenu("Options")) {
+            
+            ImGui::EndMenu();
+        }
+        
+        if (ImGui::BeginMenu("Tools")) {
+            
+            ImGui::EndMenu();
+        }
+        
+        if (ImGui::BeginMenu("Save")) {
+            // SaveFile()
+            ImGui::EndMenu();
+        }
+        
+        if (ImGui::BeginMenu("Help")) {
+            
+            ImGui::EndMenu();
+        }
+        
         DrawToolbar();
         
         // frame time counter
@@ -69,39 +96,6 @@ void EditorLayer::OnImGuiRender()
     ImGui::Begin(buffer);
         rlImGuiImageRenderTextureFit(&m_Framebuffer, true); // render framebuffer to imgui viewport
     ImGui::End();
-}
-
-void EditorLayer::DrawMenuBar() // @TODO: Implement this
-{
-    if (ImGui::BeginMenu("File"))
-    {
-        
-        ImGui::EndMenu();
-    }
-    
-    if (ImGui::BeginMenu("Options"))
-    {
-        
-        ImGui::EndMenu();
-    }
-    
-    if (ImGui::BeginMenu("Tools"))
-    {
-        
-        ImGui::EndMenu();
-    }
-    
-    if (ImGui::BeginMenu("Save"))
-    {
-        
-        ImGui::EndMenu();
-    }
-    
-    if (ImGui::BeginMenu("Help"))
-    {
-        
-        ImGui::EndMenu();
-    }
 }
 
 void EditorLayer::DrawToolbar()

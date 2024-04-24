@@ -41,7 +41,7 @@ namespace Spectral {
         rlImGuiSetup(false);
         ImGuiIO& io = ImGui::GetIO();
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-        // @TODO: Implement docking support, use docking branch (https://github.com/ocornut/imgui/tree/docking)
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         
         // fonts
         /*float fontSize = 18.0f;// *2.0f;
