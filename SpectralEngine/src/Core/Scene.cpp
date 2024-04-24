@@ -26,31 +26,63 @@ namespace Spectral {
         return false;
     }
 
-    void Scene::OnUpdateEditor(Timestep ts, EditorCamera &camera)
+    void Scene::OnUpdateRuntime(Timestep ts)
     {
-        // update components
         for (const auto& [_, v] : m_ObjectRegistry)
         {
-            v->OnUpdate(ts);
+            // find objects with camera component
+            CameraComponent* cameraComponent = v->GetComponent<CameraComponent>();
+            if (cameraComponent)
+            {
+                // find active runtime camera
+                if (cameraComponent->IsActive()) {
+                    m_RuntimeCamera = cameraComponent->GetCamera();
+                } else {
+                    m_RuntimeCamera = nullptr;
+                }
+            }
+            
+            v->OnUpdate(ts); // update each components
+        }
+    }
+
+    void Scene::OnRenderRuntime()
+    {
+        if (m_RuntimeCamera)
+        {
+            BeginMode2D(m_RuntimeCamera->GetCamera2D());
+                
+                // draw sprites
+                for (const auto& [_, v] : m_ObjectRegistry)
+                {
+                    SpriteComponent* spriteComponent = v->GetComponent<SpriteComponent>();
+                    if (spriteComponent)
+                    {
+                        spriteComponent->OnRender();
+                    }
+                }
+            
+                // @TODO: draw text and other stuff..
+                
+            EndMode2D();
         }
     }
 
     void Scene::OnRenderEditor(EditorCamera& camera)
     {
-        BeginMode2D(camera.GetCamera());
+        BeginMode2D(camera.GetCamera2D());
             
             // draw sprites
             for (const auto& [_, v] : m_ObjectRegistry)
             {
                 SpriteComponent* spriteComponent = v->GetComponent<SpriteComponent>();
-                
                 if (spriteComponent)
                 {
                     spriteComponent->OnRender();
                 }
             }
         
-            // draw text
+        // @TODO: draw text and other stuff..
         
         EndMode2D();
     }

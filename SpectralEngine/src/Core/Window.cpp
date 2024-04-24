@@ -37,10 +37,9 @@ namespace Spectral {
         SetTargetFPS(60);
         SP_LOG_INFO("ENGINE::Creating window ({0}, {1})", m_ScreenWidth, m_ScreenHeight);
         
-        // setup imgui
+        // setup imgui // @TODO: Push as overlay to layer stack
         rlImGuiSetup(false);
         ImGuiIO& io = ImGui::GetIO();
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
         // @TODO: Implement docking support, use docking branch (https://github.com/ocornut/imgui/tree/docking)
         

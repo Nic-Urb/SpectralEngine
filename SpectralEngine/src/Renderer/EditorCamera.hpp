@@ -7,8 +7,7 @@
 #pragma once
 
 #include "pch.h"
-#include "Camera.h"
-#include "Core/Timestep.h"
+#include "Camera.hpp"
 //#include "Objects/Object.hpp"
 
 namespace Spectral {
@@ -18,19 +17,14 @@ namespace Spectral {
     public:
         EditorCamera();
         
-        void OnUpdate(Timestep ts);
-        
-        Camera2D GetCamera() const { return m_Camera; }
+        void OnUpdate(Timestep ts) override;
         
     private:
-        Camera2D m_Camera = { 0 };
         float m_MoveSpeed = 10.0f, m_ZoomSpeed = 0.125f;
         
     private:
-        
-        void CameraMove(const Vector2& delta); // @TODO: clamp value to map edges
-        void CameraZoom(const Vector2& delta, float wheel); // @TODO: clamp value to map edges
-        //void CenterCameraToObject(Object& object) {} // @TODO: implement this
+        void MoveCamera(const Vector2& delta); // @TODO: clamp value to map edges or some value
+        void ZoomCamera(const Vector2& delta, float wheel); // @TODO: clamp value to map edges or some value
         
     };
 }

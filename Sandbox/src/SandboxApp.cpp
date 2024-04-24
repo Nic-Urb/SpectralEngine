@@ -18,12 +18,7 @@ class SandboxLayer : public Spectral::Layer
 public:
     SandboxLayer()
     {
-        m_SandboxWorld = std::make_shared<Spectral::Scene>();
-        
-        m_EditorCamera = Spectral::EditorCamera();
-        
-        //auto a = m_SandboxWorld->CreateObject<Spectral::StaticObject>();
-        //auto b = m_SandboxWorld->CreateObject<Spectral::StaticObject>();
+        m_ActiveScene = std::make_shared<Spectral::Scene>();
         
         Spectral::TextureManager::LoadTexture("assets/textures/Checkerboard.png");
         
@@ -33,8 +28,13 @@ public:
         //a->SetName("Static object 1");
         //b->SetName("Static object 2");
         
-        //SP_CLIENT_LOG_INFO("Object uuid: ({0})", a->GetUUID());
-        //SP_CLIENT_LOG_INFO("Object uuid: ({0})", b->GetUUID());
+        
+        // create static object
+        auto a = m_ActiveScene->CreateObject<Spectral::StaticObject>();
+        a->SetName("Test object");
+        auto comp1 = a->GetComponent<Spectral::SpriteComponent>();
+        comp1->SetSprite(Spectral::TextureManager::GetTexture("assets/textures/Checkerboard.png").get());
+        SP_CLIENT_LOG_INFO("Object uuid: ({0})", a->GetUUID());
         
         m_Framebuffer = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
         SetTextureFilter(m_Framebuffer.texture, TEXTURE_FILTER_BILINEAR);
@@ -53,15 +53,14 @@ public:
     
     void OnUpdate(Spectral::Timestep ts) override
     {
-        m_EditorCamera.OnUpdate(ts);
-        //SP_CLIENT_LOG_TRACE("Delta time: {0}s, ({1})", ts, ts.GetMiliseconds());
-        m_SandboxWorld->OnUpdateEditor(ts, m_EditorCamera); // call OnRuntimeUpdate instead
+        m_ActiveScene->OnUpdateRuntime(ts);
         
         // draw texture internally before the drawing phase
         BeginTextureMode(m_Framebuffer);
             ClearBackground(BLACK); // swap buffers
-            m_SandboxWorld->OnRenderEditor(m_EditorCamera); // call OnRuntimeRender instead
+                m_ActiveScene->OnRenderRuntime();
         EndTextureMode();
+        
     }
     
     void OnRender() override
@@ -72,10 +71,10 @@ public:
     }
     
 private:
-    std::shared_ptr<Spectral::Scene> m_SandboxWorld;
-    Spectral::EditorCamera m_EditorCamera;
-    
+    std::shared_ptr<Spectral::Scene> m_ActiveScene;
+
     RenderTexture m_Framebuffer;
+
 };
 
 class SandboxApp : public Spectral::Application

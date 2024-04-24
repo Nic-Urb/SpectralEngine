@@ -20,7 +20,7 @@ namespace Spectral {
     class Object
     {
     public:
-        ~Object();
+        ~Object(/*@TODO: Call to remove all components*/);
         
         template <typename T>
         T* AddComponent()
@@ -98,7 +98,6 @@ namespace Spectral {
     public:
         void OnUpdate(Timestep ts) override {}
     };
-
 
     // temp - delete
     class TestingObject : public Object

@@ -11,7 +11,7 @@
 #include "raylib.h"
 #include "HashString.cpp"
 #include "Core/Timestep.h"
-
+#include "Renderer/RuntimeCamera.hpp"
 
 // Using macro at compile time to declare component properties.
 // std::string_view instead of string, to avoid errors in older C++, in C++20 it wouldn't be necessary
@@ -81,14 +81,16 @@ namespace Spectral {
         
         void OnRender() override;
         
-        void SetSprite(const Texture2D& texture) {
-            m_Texture = texture;
+        void SetSprite(const Texture2D* texture)
+        {
+            m_Texture = *texture;
             // temp
             m_Bounds.x = 0.0f;
             m_Bounds.y = 0.0f;
             m_Bounds.width = m_Texture.width;
             m_Bounds.height = m_Texture.height;
         }
+        
         void SetBounds(const Rectangle& bounds) { m_Bounds = bounds; }
         
         float* GetTint() { return m_Tint; }
@@ -114,6 +116,15 @@ namespace Spectral {
     {
     public:
         DECLARE_COMPONENT(CameraComponent)
+        
+        void OnConstruct() override { m_Camera = std::make_shared<RuntimeCamera>(); }
+        
+        std::shared_ptr<RuntimeCamera> GetCamera() { return m_Camera; }
+        bool& IsActive() { return m_Active; }
+        
+    private:
+        std::shared_ptr<RuntimeCamera> m_Camera;
+        bool m_Active = false;
     };
 
 }

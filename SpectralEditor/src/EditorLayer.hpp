@@ -8,7 +8,7 @@
 #include "Renderer/EditorCamera.hpp"
 #include "Panels/HierarchyPanel.hpp"
 
-class EditorLayer : public Spectral::Layer
+class EditorLayer : public Spectral::Layer // @TODO: If selected context contains camera component -> draw visualization to show a camera position
 {
 public:
     EditorLayer();
@@ -34,9 +34,21 @@ public:
     void OnImGuiRender() override;
     
 private:
-    std::shared_ptr<Spectral::Scene> m_EditorScene;
+    std::shared_ptr<Spectral::Scene> m_ActiveScene;
     Spectral::EditorCamera m_EditorCamera;
     Spectral::HierarchyPanel m_HierarchyPanel;
     
     RenderTexture m_Framebuffer;
+    
+    enum class SceneState {
+        Edit = 0, Play = 1
+    };
+    SceneState m_CurrentState = SceneState::Edit;
+    
+private:
+    void DrawMenuBar();
+    void DrawToolbar();
+    
+    void OnRuntimeStart();
+    void OnRuntimeStop();
 };

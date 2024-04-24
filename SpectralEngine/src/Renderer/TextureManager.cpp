@@ -10,7 +10,7 @@
 
 namespace Spectral {
 
-    std::unordered_map<std::string, Texture> TextureManager::m_TexturesRegistry;
+    std::unordered_map<std::string, std::shared_ptr<Texture>> TextureManager::m_TexturesRegistry;
 
     void TextureManager::LoadTexture(const std::string& texturePath)
     {
@@ -21,7 +21,9 @@ namespace Spectral {
         
         const Texture texture = ::LoadTexture(texturePath.c_str());
         if (texture.id > 0) {
-            m_TexturesRegistry[texturePath] = texture;
+            SP_LOG_WARN("LoadTexture::Texture ({0}) has been loaded", texturePath);
+            std::shared_ptr<Texture> texturePtr = std::make_shared<Texture>(texture);
+            m_TexturesRegistry[texturePath] = texturePtr;
         } else {
             SP_LOG_WARN("LoadTexture::Texture ({0}) has failed to load, we can't add them to registry.", texturePath);
         }
@@ -34,7 +36,7 @@ namespace Spectral {
             return;
         }
         
-        ::UnloadTexture(m_TexturesRegistry[texturePath]);
+        ::UnloadTexture(*m_TexturesRegistry[texturePath]);
         m_TexturesRegistry.erase(texturePath);
     }
 
@@ -42,19 +44,19 @@ namespace Spectral {
     {
         for (const auto& [_, v] : m_TexturesRegistry)
         {
-            ::UnloadTexture(v);
+            ::UnloadTexture(*v);
         }
         m_TexturesRegistry.clear();
     }
 
-    Texture TextureManager::GetTexture(const std::string &texturePath)
+    std::shared_ptr<Texture> TextureManager::GetTexture(const std::string &texturePath)
     {
         if (TextureExists(texturePath)) {
             return m_TexturesRegistry[texturePath];
         }
         
         SP_LOG_WARN("GetTetxture::Texture does not exist, can't access the texture!");
-        return {};
+        return nullptr;
     }
 
     bool TextureManager::TextureExists(const std::string& texturePath)

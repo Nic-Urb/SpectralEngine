@@ -5,6 +5,8 @@
 //  Created by Nicolas U on 14.04.24.
 //
 
+// @TODO: Disable warnings #ifndef ...
+
 #include "HierarchyPanel.hpp"
 
 #include "imgui.h"
@@ -16,7 +18,7 @@ namespace Spectral {
         SetContext(context);
     }
 
-    void HierarchyPanel::OnImGuiRender() // @TODO: RENAME WORLD TO SCENE !!
+    void HierarchyPanel::OnImGuiRender()
     {
         ImGui::Begin("Scene");
         
@@ -128,6 +130,7 @@ namespace Spectral {
 
         if (ImGui::BeginPopup("AddComponent"))
         {
+            DisplayAddComponentEntry<CameraComponent>("Camera");
             DisplayAddComponentEntry<TransformComponent>("Transform");
             DisplayAddComponentEntry<SpriteComponent>("Sprite");
             DisplayAddComponentEntry<AnimationComponent>("Animation");
@@ -151,6 +154,18 @@ namespace Spectral {
             ImGui::TreePop();
         }
         
+        
+        DrawComponent<CameraComponent>("Camera", /*calling anonymous function*/ [](auto& component) {
+            ImGui::Checkbox("IsActive?", &component.IsActive());
+            
+            // @TODO: Position control sliders
+            /*auto camera = component.GetCamera();
+            ImGui::Text("Camera Position");
+            ImGui::DragFloat("x", &camera->GetPosition().x, 0.01f, 0.0f, 0.0f, "%.2f");
+            ImGui::DragFloat("y", &camera->GetPosition().y, 0.01f, 0.0f, 0.0f, "%.2f");*/
+        });
+        
+        
         DrawComponent<TransformComponent>("Transform", /*calling anonymous function*/ [](auto& component) {
             ImGui::Text("Relative translation");
             DrawTransformControl(component);
@@ -168,20 +183,15 @@ namespace Spectral {
                 //component.SetSprite(TextureManager::GetTexture(std::string(buffer)));
                 // @TODO: Replace with upper code !!
                 TextureManager::LoadTexture("assets/textures/Checkerboard.png");
-                component.SetSprite(TextureManager::GetTexture("assets/textures/Checkerboard.png"));
+                component.SetSprite(TextureManager::GetTexture("assets/textures/Checkerboard.png").get());
             }
             
             ImGui::ColorEdit4("Tint Color", component.GetTint());
         });
         
+        
         DrawComponent<AnimationComponent>("Animation", /*calling anonymous function*/ [](auto& component) {
             
-        });
-        
-        
-        DrawComponent<CameraComponent>("Camera", /*calling anonymous function*/ [](auto& component) {
-            
-            //auto& camera = component.GetCamera();
         });
         
         

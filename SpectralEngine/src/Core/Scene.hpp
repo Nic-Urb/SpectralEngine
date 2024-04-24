@@ -10,6 +10,7 @@
 
 #include "Core/UUID.hpp"
 #include "Renderer/EditorCamera.hpp"
+#include "Renderer/RuntimeCamera.hpp"
 
 
 namespace Spectral {
@@ -39,21 +40,19 @@ namespace Spectral {
         
         bool RemoveObject(UUID uuid);
         
-        // OnRuntimeStart(...)
-        // OnRuntimePause()
-        // OnRuntimeEnd()
+        // OnRuntimeStart(...) @TODO: Implement this
+        // OnRuntimePause() @TODO: Implement this
+        // OnRuntimeEnd() @TODO: Implement this
         
-        //void OnUpdateRuntime(Timestep ts, EditorCamera& camera);
-        //void OnUpdateRuntime(EditorCamera& camera);
+        void OnUpdateRuntime(Timestep ts);
+        void OnRenderRuntime();
         
-        void OnUpdateEditor(Timestep ts, EditorCamera& camera/* Do we need camera ?? */);
         void OnRenderEditor(EditorCamera& camera); // this update should be called from client layer update function
         
     private:
         std::unordered_map<UUID, std::unique_ptr<Object>> m_ObjectRegistry;
-        
+        std::shared_ptr<RuntimeCamera> m_RuntimeCamera;
         
         friend class HierarchyPanel; // allow access to private members
-
     };
 }
