@@ -18,8 +18,6 @@ namespace Spectral {
         
         void OnUpdate(Timestep ts) override;
         
-        void FocusAt(const Vector2& position);
-        
     private:
         
         // ...

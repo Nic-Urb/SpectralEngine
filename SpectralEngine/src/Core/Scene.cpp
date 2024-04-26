@@ -37,6 +37,7 @@ namespace Spectral {
                 // find active runtime camera
                 if (cameraComponent->IsActive()) {
                     m_RuntimeCamera = cameraComponent->GetCamera();
+                    break;
                 } else {
                     m_RuntimeCamera = nullptr;
                 }
@@ -50,41 +51,44 @@ namespace Spectral {
     {
         if (m_RuntimeCamera)
         {
-            BeginMode2D(m_RuntimeCamera->GetCamera2D());
-                
+            BeginMode3D(m_RuntimeCamera->GetCamera3D());
+            
                 // draw sprites
                 for (const auto& [_, v] : m_ObjectRegistry)
                 {
                     SpriteComponent* spriteComponent = v->GetComponent<SpriteComponent>();
                     if (spriteComponent)
                     {
-                        spriteComponent->OnRender();
+                        spriteComponent->OnRender(m_RuntimeCamera->GetCamera3D());
                     }
                 }
             
-                // @TODO: draw text and other stuff..
+                // @TODO: draw text, draw 3d models, ...
                 
-            EndMode2D();
+            EndMode3D();
         }
     }
 
     void Scene::OnRenderEditor(EditorCamera& camera)
     {
-        BeginMode2D(camera.GetCamera2D());
+        BeginMode3D(camera.GetCamera3D());
             
+            // draw grid
+            DrawGrid(20, 10.0f);
+        
             // draw sprites
             for (const auto& [_, v] : m_ObjectRegistry)
             {
                 SpriteComponent* spriteComponent = v->GetComponent<SpriteComponent>();
                 if (spriteComponent)
                 {
-                    spriteComponent->OnRender();
+                    spriteComponent->OnRender(camera.GetCamera3D());
                 }
             }
         
-        // @TODO: draw text and other stuff..
+        // @TODO: draw text, draw 3d models, ...
         
-        EndMode2D();
+        EndMode3D();
     }
 
 }

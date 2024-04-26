@@ -17,21 +17,23 @@ namespace Spectral {
     {
     public:
         Camera() = default;
-        Camera(Camera2D& camera);
+        Camera(const Camera3D& camera);
         virtual ~Camera() = default;
         
         virtual void OnUpdate(Timestep ts) = 0;
         
         // shared functions
-        void BlendCameras(Camera2D& otherCamera, float delta);
-        Camera2D GetCamera2D() const { return m_Camera2D; }
+        void ChangeProjection(int projection); // Projection : CAMERA_PERSPECTIVE, CAMERA_ORTHOGRAPHIC
+        
+        void BlendCameras(Camera3D& otherCamera, float delta);
+        const Camera3D& GetCamera3D() { return m_Camera3D; }
         
     protected:
-        Camera2D m_Camera2D = (Camera2D){ 0 };
+        Camera3D m_Camera3D = {(Vector3){0.0f, 20.0f, 20.0f}, (Vector3){0.0f, 10.0f, 0.0f}, (Vector3){0.0f, 1.0f, 0.0f}, 45.0f, CAMERA_PERSPECTIVE};
         
     protected:
         // focus camera on some position
-        virtual void FocusCamera(const Vector2& position, float width, float height);
+        virtual void FocusCamera(const Vector3& position, float width, float height); // @TODO: Define this function
 
     };
 }

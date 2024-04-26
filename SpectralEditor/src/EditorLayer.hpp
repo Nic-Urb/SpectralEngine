@@ -34,19 +34,25 @@ public:
     void OnImGuiRender() override;
     
 private:
+    enum class SceneState {
+        Edit = 0,
+        Play = 1
+    };
+    
+private:
     std::shared_ptr<Spectral::Scene> m_ActiveScene;
     Spectral::EditorCamera m_EditorCamera;
     Spectral::HierarchyPanel m_HierarchyPanel;
     
     RenderTexture m_Framebuffer;
     
-    enum class SceneState {
-        Edit = 0, Play = 1
-    };
     SceneState m_CurrentState = SceneState::Edit;
     
 private:
     void DrawToolbar();
+    
+    void OnGizmoRender();
+    void OnGizmoUpdate();
     
     void OnRuntimeStart();
     void OnRuntimeStop();

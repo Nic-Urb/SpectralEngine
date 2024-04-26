@@ -8,23 +8,23 @@
 
 #include "pch.h"
 #include "Camera.hpp"
-//#include "Objects/Object.hpp"
 
 namespace Spectral {
     
     class EditorCamera : public Camera
     {
     public:
-        EditorCamera();
+        EditorCamera() = default;
+        EditorCamera(const Camera3D camera);
         
         void OnUpdate(Timestep ts) override;
         
     private:
-        float m_MoveSpeed = 10.0f, m_ZoomSpeed = 0.125f;
+        float m_MoveSpeed = 10.0f, m_ZoomSpeed = 0.125f, m_PanSpeed = 0.003f; // @TODO: 3D: Use ZoomSpeed !
         
     private:
-        void MoveCamera(const Vector2& delta); // @TODO: clamp value to map edges or some value
-        void ZoomCamera(const Vector2& delta, float wheel); // @TODO: clamp value to map edges or some value
+        void MoveCamera(const Vector2& delta); // @TODO: clamp values to map edges or some value
+        void PanCamera(const Vector2& delta);
         
     };
 }

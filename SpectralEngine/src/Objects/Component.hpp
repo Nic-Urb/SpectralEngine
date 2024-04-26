@@ -35,7 +35,7 @@ namespace Spectral {
         
         virtual void OnConstruct() {}
         virtual void OnDestroy() {}
-        virtual void OnRender() {}
+        virtual void OnRender(const Camera3D& camera) {}
         virtual void OnUpdate(Timestep ts) {}
         
     protected:
@@ -47,7 +47,7 @@ namespace Spectral {
     };
 
 
-    class TransformComponent : public Component
+    class TransformComponent : public Component // @TODO: 3D - add support xyz axis
     {
     public:
         DECLARE_COMPONENT(TransformComponent)
@@ -79,7 +79,7 @@ namespace Spectral {
     public:
         DECLARE_COMPONENT(SpriteComponent)
         
-        void OnRender() override;
+        void OnRender(const Camera3D& camera) override;
         
         void SetSprite(const Texture2D* texture)
         {

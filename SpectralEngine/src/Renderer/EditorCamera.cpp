@@ -9,41 +9,41 @@
 
 #include "rlgl.h"
 #include "raymath.h"
+#include "rcamera.h"
 
 namespace Spectral {
 
-    EditorCamera::EditorCamera()
+    EditorCamera::EditorCamera(const Camera3D camera) : Camera(camera)
     {
-        m_Camera2D.zoom = 1.0f;
     }
 
     void EditorCamera::MoveCamera(const Vector2& delta)
     {
+        // Keyboard support
         if (IsKeyDown(KEY_W)) {
-            m_Camera2D.target.y -= m_MoveSpeed;
+            CameraMoveForward(&m_Camera3D, m_MoveSpeed, false);
         } else if (IsKeyDown(KEY_A)) {
-            m_Camera2D.target.x -= m_MoveSpeed;
+            CameraMoveRight(&m_Camera3D, -m_MoveSpeed, false);
         } else if (IsKeyDown(KEY_S)) {
-            m_Camera2D.target.y += m_MoveSpeed;
+            CameraMoveForward(&m_Camera3D, -m_MoveSpeed, false);
         } else if (IsKeyDown(KEY_D)) {
-            m_Camera2D.target.x += m_MoveSpeed;
-        } else {
-            Vector2 deltaScale = Vector2Scale(delta, -1.0f/m_Camera2D.zoom);
-            m_Camera2D.target = Vector2Add(m_Camera2D.target, deltaScale);
+            CameraMoveRight(&m_Camera3D, m_MoveSpeed, false);
         }
+        
+        // @TODO: Gamepad support
+        /*if (IsGamepadAvailable(0)) {
+        }*/
     }
 
-    void EditorCamera::ZoomCamera(const Vector2& delta, float wheel)
+    void EditorCamera::PanCamera(const Vector2& delta)
     {
-        Vector2 mouseWorldPos = GetScreenToWorld2D(GetMousePosition(), m_Camera2D);
-                
-        m_Camera2D.offset = GetMousePosition();
-        // Set the target to match, so that the camera maps the world space point
-        // under the cursor to the screen space point under the cursor at any zoom
-        m_Camera2D.target = mouseWorldPos;
-
-        m_Camera2D.zoom += (wheel*m_ZoomSpeed);
-        if (m_Camera2D.zoom < m_ZoomSpeed) { m_Camera2D.zoom = m_ZoomSpeed; }
+        // Mouse support
+        CameraYaw(&m_Camera3D, -delta.x*m_PanSpeed, false);
+        CameraPitch(&m_Camera3D, -delta.y*m_PanSpeed, false, false, false);
+        
+        // @TODO: Gamepad support
+        /*if (IsGamepadAvailable(0)) {
+        }*/
     }
     
     void EditorCamera::OnUpdate(Timestep ts)
@@ -52,10 +52,11 @@ namespace Spectral {
         const float mouseWheel = GetMouseWheelMove();
         
         if (mouseWheel != 0) {
-            ZoomCamera(delta, mouseWheel);
+            CameraMoveToTarget(&m_Camera3D, mouseWheel);
         }
         
         if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) { // support right mouse hold and wasd keyboard to move
+            PanCamera(delta);
             MoveCamera(delta);
         }
     }

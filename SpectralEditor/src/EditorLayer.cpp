@@ -96,6 +96,9 @@ void EditorLayer::OnImGuiRender()
     ImGui::Begin(buffer);
         rlImGuiImageRenderTextureFit(&m_Framebuffer, true); // render framebuffer to imgui viewport
     ImGui::End();
+    
+    
+    OnGizmoUpdate(); // update gizmo
 }
 
 void EditorLayer::DrawToolbar()
@@ -129,6 +132,11 @@ void EditorLayer::DrawToolbar()
     }
     
     ImGui::PopStyleColor(1);
+}
+
+void EditorLayer::OnGizmoUpdate()
+{
+    
 }
 
 void EditorLayer::OnRuntimeStart() // @TODO: Implement

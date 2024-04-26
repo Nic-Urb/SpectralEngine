@@ -51,7 +51,7 @@ namespace Spectral {
 
 // ----- SpriteComponent -----
 
-    void SpriteComponent::OnRender()
+    void SpriteComponent::OnRender(const Camera3D& camera)
     {
         if (!IsTextureReady(m_Texture)) {
             return;
@@ -67,7 +67,8 @@ namespace Spectral {
         
         const Rectangle dest = { m_Bounds.x, m_Bounds.y, fabsf(m_Bounds.width * 0.1f/* Scale */), fabsf(m_Bounds.height * 0.1f/* Scale */) };
         
-        DrawTexturePro(m_Texture, m_Bounds, dest, Vector2{ dest.width * 0.5f, dest.height* 0.5f}, 0, ConvertToColor());
+        //DrawTexturePro(m_Texture, m_Bounds, dest, Vector2{ dest.width * 0.5f, dest.height* 0.5f}, 0, ConvertToColor());
+        DrawBillboard(camera, m_Texture, (Vector3){0.0f, 2.0f, 0.0f}, 150.0f, ConvertToColor()); // @TODO: Do this properly
     
         if (transform) {
             transform->PopMatrix();

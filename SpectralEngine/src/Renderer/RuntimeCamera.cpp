@@ -11,12 +11,8 @@ namespace Spectral {
 
     RuntimeCamera::RuntimeCamera()
     {
-        m_Camera2D.zoom = 1.0f;
     }
 
     void RuntimeCamera::OnUpdate(Timestep ts)
-    {}
-
-    void RuntimeCamera::FocusAt(const Vector2& position)
     {}
 }
