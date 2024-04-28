@@ -26,21 +26,14 @@ namespace Spectral {
 
 // ----- TransformComponent -----
 
-    void TransformComponent::SetTransform(const Vector2& translate, float rotate, const Vector2& scale)
-    {
-        m_Transform.Translation.x += translate.x;
-        m_Transform.Translation.y += translate.y;
-        m_Transform.Rotation += rotate;
-        m_Transform.Scale.x += scale.x;
-        m_Transform.Scale.y += scale.y;
-    }
-
     void TransformComponent::PushMatrix()
     {
         rlPushMatrix();
-        rlTranslatef(m_Transform.Translation.x, m_Transform.Translation.y, 0);
-        rlRotatef(m_Transform.Rotation, 0, 0, 1);
-        rlScalef(m_Transform.Scale.x, m_Transform.Scale.y, 0);
+        rlTranslatef(m_Transform.Translation.x, m_Transform.Translation.y, m_Transform.Translation.z);
+        rlRotatef(m_Transform.Rotation.x, 1, 0, 0);
+        rlRotatef(m_Transform.Rotation.y, 0, 1, 0);
+        rlRotatef(m_Transform.Rotation.z, 0, 0, 1);
+        rlScalef(m_Transform.Scale.x, m_Transform.Scale.y, m_Transform.Scale.z);
     }
 
 

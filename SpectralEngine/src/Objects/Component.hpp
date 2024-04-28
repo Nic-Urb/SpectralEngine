@@ -47,26 +47,21 @@ namespace Spectral {
     };
 
 
-    class TransformComponent : public Component // @TODO: 3D - add support xyz axis
+    class TransformComponent : public Component
     {
     public:
         DECLARE_COMPONENT(TransformComponent)
         
         struct Transform2D {
-            Vector2 Translation = {0.0f, 0.0f};
-            float Rotation = 0.0f;
-            Vector2 Scale = {1.0f, 1.0f};
+            Vector3 Translation = {0.0f, 0.0f, 0.0f};
+            Vector3 Rotation = {0.0f, 0.0f, 0.0f};
+            Vector3 Scale = {1.0f, 1.0f, 1.0f};
         };
-        
-        // -- set relative to current transform 0 , 0 , 0 means nothing changed
-        void SetTransform(const Vector2& translate, float rotate, const Vector2& scale);
         
         void PushMatrix();
         void PopMatrix();
         
-        Vector2& GetTranslation() { return m_Transform.Translation; }
-        float& GetRotation() { return m_Transform.Rotation; }
-        Vector2& GetScale() { return m_Transform.Scale; }
+        Transform2D& GetTransform() { return m_Transform; }
         
     private:
         Transform2D m_Transform;

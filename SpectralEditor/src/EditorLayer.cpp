@@ -9,6 +9,8 @@
 
 #include "rlImGui.h"
 #include "imgui.h"
+#include "raymath.h"
+#include "ImGuizmo.h"
 
 
 EditorLayer::EditorLayer()
@@ -33,6 +35,20 @@ void EditorLayer::OnUpdate(Spectral::Timestep ts)
         m_EditorCamera.OnUpdate(ts);
     } else {
         m_ActiveScene->OnUpdateRuntime(ts);
+    }
+    
+    // handle input events
+    if (IsKeyPressed(KEY_Q)) {
+        m_CurrentGizmo = -1;
+    }
+    if (IsKeyPressed(KEY_T)) {
+        m_CurrentGizmo = ImGuizmo::OPERATION::TRANSLATE;
+    }
+    if (IsKeyPressed(KEY_E)) {
+        m_CurrentGizmo = ImGuizmo::OPERATION::SCALE;
+    }
+    if (IsKeyPressed(KEY_R)) {
+        m_CurrentGizmo = ImGuizmo::OPERATION::ROTATE;
     }
     
     // draw texture internally before the drawing phase
@@ -95,10 +111,19 @@ void EditorLayer::OnImGuiRender()
     snprintf(buffer, sizeof(buffer), "Game (%s)###Viewport", name.c_str());
     ImGui::Begin(buffer);
         rlImGuiImageRenderTextureFit(&m_Framebuffer, true); // render framebuffer to imgui viewport
+        if (m_CurrentState == SceneState::Edit) {
+            OnGizmoUpdate(); // updates and render gizmo only in editor mode
+        }
     ImGui::End();
     
-    
-    OnGizmoUpdate(); // update gizmo
+    if (ImGui::Begin("Engine Stats")) {
+        ImGuiIO& io = ImGui::GetIO();
+        if (ImGui::IsMousePosValid())
+        {
+            ImGui::Text("Mouse Position: (%.1f,%.1f)", io.MousePos.x, io.MousePos.y);
+        }
+    }
+    ImGui::End();
 }
 
 void EditorLayer::DrawToolbar()
@@ -136,7 +161,53 @@ void EditorLayer::DrawToolbar()
 
 void EditorLayer::OnGizmoUpdate()
 {
-    
+    Spectral::Object* selectedObject = m_HierarchyPanel.GetSelectedContext();
+    if (selectedObject && m_CurrentGizmo != -1)
+    {
+        Spectral::TransformComponent* tc = selectedObject->GetComponent<Spectral::TransformComponent>();
+        
+        if (!tc) {
+            return;
+        }
+        
+        ImGuizmo::SetOrthographic(false);
+        ImGuizmo::SetDrawlist();
+        
+        float windowWidth = (float)ImGui::GetWindowWidth();
+        float windowHeight = (float)ImGui::GetWindowHeight();
+        
+        ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+        
+        Matrix cameraProjection = m_EditorCamera.GetCameraProjectionMatrix(windowWidth/windowHeight);
+        Matrix cameraView = m_EditorCamera.GetCameraViewMatrix();
+            
+        // recompose matrix
+        float transformMatrix[4 * 4];
+        ImGuizmo::RecomposeMatrixFromComponents(Vector3ToFloat(tc->GetTransform().Translation), Vector3ToFloat(tc->GetTransform().Rotation), Vector3ToFloat(tc->GetTransform().Scale), transformMatrix);
+            
+        // snapping
+        bool snap = IsKeyDown(KEY_LEFT_CONTROL);
+        float snapValue = 0.5f;
+        if (m_CurrentGizmo == ImGuizmo::OPERATION::ROTATE) {
+            snapValue = 45.0f;
+        }
+        float snapValues[3] = { snapValue, snapValue, snapValue };
+            
+        ImGuizmo::Manipulate(MatrixToFloat(cameraView), MatrixToFloat(cameraProjection), (ImGuizmo::OPERATION)m_CurrentGizmo, ImGuizmo::LOCAL, transformMatrix, nullptr, snap ? snapValues : nullptr);
+            
+        if (ImGuizmo::IsUsing())
+        {
+            float translation[3];
+            float rotation[3];
+            float scale[3];
+
+            ImGuizmo::DecomposeMatrixToComponents(transformMatrix, translation, rotation, scale);
+                
+            tc->GetTransform().Translation = {translation[0], translation[1], translation[2]};
+            tc->GetTransform().Rotation = {rotation[0], rotation[1], rotation[2]};
+            tc->GetTransform().Scale = {scale[0], scale[1], scale[2]};
+        }
+    }
 }
 
 void EditorLayer::OnRuntimeStart() // @TODO: Implement

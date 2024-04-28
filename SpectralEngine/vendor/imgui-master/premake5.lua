@@ -31,8 +31,3 @@ project "imgui"
         "../raylib-master/src/external",
         "../raylib-master/src/external/glfw/include" 
     }
-    
-    defines {
-        "IMGUI_DISABLE_OBSOLETE_FUNCTIONS",
-        "IMGUI_DISABLE_OBSOLETE_KEYIO"
-    }

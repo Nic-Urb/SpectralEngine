@@ -47,6 +47,7 @@ private:
     RenderTexture m_Framebuffer;
     
     SceneState m_CurrentState = SceneState::Edit;
+    int m_CurrentGizmo = -1;
     
 private:
     void DrawToolbar();

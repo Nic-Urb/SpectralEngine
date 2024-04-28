@@ -10,6 +10,7 @@
 #include "HierarchyPanel.hpp"
 
 #include "imgui.h"
+#include "imgui_internal.h"
 
 namespace Spectral {
 
@@ -167,9 +168,9 @@ namespace Spectral {
         
         
         DrawComponent<TransformComponent>("Transform", /*calling anonymous function*/ [](auto& component) {
-            ImGui::Text("Relative translation");
-            DrawTransformControl(component);
-            
+            DrawVector3Control("Translation", component.GetTransform().Translation);
+            DrawVector3Control("Rotation", component.GetTransform().Rotation);
+            DrawVector3Control("Scale", component.GetTransform().Scale);
         });
         
         
@@ -269,21 +270,48 @@ namespace Spectral {
         }
     }
 
-    void HierarchyPanel::DrawTransformControl(auto& component) 
+    void HierarchyPanel::DrawVector3Control(const std::string& name, Vector3& values) 
     {
-        // ---- Translate
-        ImGui::Text("Translate Control");
-        ImGui::DragFloat("##X", &component.GetTranslation().x, 0.1f, 0.0f, 0.0f, "%.2f");
-        ImGui::DragFloat("##Y", &component.GetTranslation().y, 0.1f, 0.0f, 0.0f, "%.2f");
+        const float sliderSpeed = 0.05f;
         
-        // ---- Rotate
-        ImGui::Text("Rotation Control");
-        ImGui::DragFloat("##Rotation", &component.GetRotation(), 0.1f, 0.0f, 0.0f, "%.2f");
+        ImGui::PushID(name.c_str());
         
-        // ---- Scale
-        ImGui::Text("Scale Control");
-        ImGui::DragFloat("##ScaleX", &component.GetScale().x, 0.01f, 0.0f, 0.0f, "%.2f");
-        ImGui::DragFloat("##ScaleY", &component.GetScale().y, 0.01f, 0.0f, 0.0f, "%.2f");
+        ImGui::Text(name.c_str());
+        
+        ImGui::PushMultiItemsWidths(3, 120/*width size*/);
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 4.0f, 4.0f });
+        
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+            ImGui::Button("X");
+            ImGui::SameLine();
+            ImGui::DragFloat("##X", &values.x, sliderSpeed, 0.0f, 0.0f, "%.2f");
+        ImGui::PopStyleColor(2);
+        
+        ImGui::SameLine();
+        
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.8f, 0.15f, 1.0f });
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4{ 0.1f, 0.8f, 0.1f, 1.0f });
+            ImGui::Button("Y");
+            ImGui::SameLine();
+            ImGui::DragFloat("##Y", &values.y, sliderSpeed, 0.0f, 0.0f, "%.2f");
+        ImGui::PopStyleColor(2);
+        
+        ImGui::SameLine();
+        
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.15f, 0.8f, 1.0f });
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4{ 0.1f, 0.15f, 0.8f, 1.0f });
+            ImGui::Button("Z");
+            ImGui::SameLine();
+            ImGui::DragFloat("##Z", &values.z, sliderSpeed, 0.0f, 0.0f, "%.2f");
+        ImGui::PopStyleColor(2);
+        
+        
+        ImGui::PopItemWidth();
+        ImGui::PopStyleVar();
+        
+        
+        ImGui::PopID();
     }
 
 }

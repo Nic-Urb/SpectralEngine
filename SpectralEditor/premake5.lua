@@ -21,7 +21,8 @@ project "SpectralEditor"
         "%{wks.location}/SpectralEngine/vendor",
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.imgui}",
-        "%{IncludeDir.yaml_cpp}"
+        "%{IncludeDir.yaml_cpp}",
+        "%{IncludeDir.imguizmo}"
     }
 
     filter "action:xcode4"

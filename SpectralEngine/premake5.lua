@@ -12,15 +12,21 @@ project "SpectralEngine"
         "src/**.c", 
         "src/**.cpp", 
         "src/**.h", 
-        "src/**.hpp"
+        "src/**.hpp",
+        "vendor/ImGuizmo/ImGuizmo.cpp",
+        "vendor/ImGuizmo/ImGuizmo.h"
     }
   
     includedirs { 
         "src",
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.imgui}",
-        "%{IncludeDir.yaml_cpp}"
+        "%{IncludeDir.yaml_cpp}",
+        "%{IncludeDir.imguizmo}"
     }
+
+    --filter "files::vendor/ImGuizmo/**.cpp"
+      --  flags {"NoPCH"}
 
     --link_raylib()
     include_raylib()

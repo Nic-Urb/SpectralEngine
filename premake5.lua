@@ -40,6 +40,7 @@ IncludeDir = {}
 IncludeDir["spdlog"] = "%{wks.location}/SpectralEngine/vendor/spdlog/include"
 IncludeDir["imgui"] = "%{wks.location}/SpectralEngine/vendor/imgui-master"
 IncludeDir["yaml_cpp"] = "%{wks.location}/SpectralEngine/vendor/yaml-cpp/include"
+IncludeDir["imguizmo"] = "%{wks.location}/SpectralEngine/vendor/ImGuizmo"
 --box2d
 
 group "Dependencies"

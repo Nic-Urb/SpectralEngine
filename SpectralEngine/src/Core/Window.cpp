@@ -38,6 +38,7 @@ namespace Spectral {
         SP_LOG_INFO("ENGINE::Creating window ({0}, {1})", m_ScreenWidth, m_ScreenHeight);
         
         // setup imgui // @TODO: Push as overlay to layer stack
+        IMGUI_CHECKVERSION();
         rlImGuiSetup(false);
         ImGuiIO& io = ImGui::GetIO();
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls

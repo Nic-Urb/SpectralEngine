@@ -6,7 +6,9 @@
 //
 
 #include "Camera.hpp"
+
 #include "raymath.h"
+#include "rlgl.h"
 
 namespace Spectral {
     Camera::Camera(const Camera3D& camera) : m_Camera3D(camera)
@@ -18,6 +20,28 @@ namespace Spectral {
         {
             m_Camera3D.projection = projection;
         }
+    }
+
+    Matrix Camera::GetCameraViewMatrix()
+    {
+        return MatrixLookAt(m_Camera3D.position, m_Camera3D.target, m_Camera3D.up);
+    }
+
+    Matrix Camera::GetCameraProjectionMatrix(float aspect)
+    {
+        if (m_Camera3D.projection == CAMERA_PERSPECTIVE)
+        {
+            return MatrixPerspective(m_Camera3D.fovy*DEG2RAD, aspect, RL_CULL_DISTANCE_NEAR, RL_CULL_DISTANCE_FAR);
+        }
+        else if (m_Camera3D.projection == CAMERA_ORTHOGRAPHIC)
+        {
+            double top = m_Camera3D.fovy/2.0;
+            double right = top*aspect;
+
+            return MatrixOrtho(-right, right, -top, top, RL_CULL_DISTANCE_NEAR, RL_CULL_DISTANCE_FAR);
+        }
+
+        return MatrixIdentity();
     }
 
     void Camera::BlendCameras(Camera3D& otherCamera, float delta) // @TODO: Test this function inside a Sandbox app !!

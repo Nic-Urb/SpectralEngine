@@ -36,7 +36,7 @@ namespace Spectral {
         template <typename T>
         void DisplayAddComponentEntry(const std::string& entryName);
         
-        static void DrawTransformControl(auto& component);
+        static void DrawVector3Control(const std::string& name, Vector3& values);
         
     };
 }

@@ -9,6 +9,8 @@
 
 #include "Timestep.h"
 #include "rlImGui.h"
+#include "imgui.h"
+#include "ImGuizmo.h"
 #include "raylib.h"
 
 
@@ -60,6 +62,7 @@ namespace Spectral {
                     }
 
                 rlImGuiBegin();
+                ImGuizmo::BeginFrame();
             
                     for (Layer* layer : m_LayerStack) {
                         layer->OnImGuiRender(); }
