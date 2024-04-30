@@ -15,7 +15,7 @@ namespace Spectral {
     class TextureManager
     {
     public:
-        static void LoadTexture(const std::string& texturePath);
+        static std::shared_ptr<Texture> LoadTexture(const std::string& texturePath);
         static void UnloadTexture(const std::string& texturePath);
         static void UnloadAllTextures(); // @TODO: Call this in client's Layer
         

@@ -4,7 +4,6 @@
 //
 //  Created by Nicolas U on 07.04.24.
 //
-
 #include "TextureManager.hpp"
 
 
@@ -12,20 +11,21 @@ namespace Spectral {
 
     std::unordered_map<std::string, std::shared_ptr<Texture>> TextureManager::m_TexturesRegistry;
 
-    void TextureManager::LoadTexture(const std::string& texturePath)
+    std::shared_ptr<Texture> TextureManager::LoadTexture(const std::string& texturePath)
     {
         if (TextureExists(texturePath)) {
             SP_LOG_WARN("LoadTexture::Texture at path ({0}) exist!", texturePath);
-            return;
+            return m_TexturesRegistry[texturePath];
         }
         
         const Texture texture = ::LoadTexture(texturePath.c_str());
         if (texture.id > 0) {
-            SP_LOG_WARN("LoadTexture::Texture ({0}) has been loaded", texturePath);
             std::shared_ptr<Texture> texturePtr = std::make_shared<Texture>(texture);
             m_TexturesRegistry[texturePath] = texturePtr;
+            return texturePtr;
         } else {
             SP_LOG_WARN("LoadTexture::Texture ({0}) has failed to load, we can't add them to registry.", texturePath);
+            return nullptr;
         }
     }
 

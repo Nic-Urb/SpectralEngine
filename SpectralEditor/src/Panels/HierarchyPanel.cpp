@@ -12,6 +12,8 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 
+#include <filesystem>
+
 namespace Spectral {
 
     HierarchyPanel::HierarchyPanel(const std::shared_ptr<Scene>& context)
@@ -175,16 +177,18 @@ namespace Spectral {
         
         
         DrawComponent<SpriteComponent>("Sprite", /*calling anonymous function*/ [](auto& component) {
-            static char buffer[128];
-            ImGui::InputText("##Texture", buffer, sizeof(buffer));
+            ImGui::Button("Load Texture", ImVec2(100.0f, 0.0f));
             
-            if (ImGui::Button("Load Texture", ImVec2(100.0f, 0.0f)))
-            {
-                //TextureManager::LoadTexture(std::string(buffer));
-                //component.SetSprite(TextureManager::GetTexture(std::string(buffer)));
-                // @TODO: Replace with upper code !!
-                TextureManager::LoadTexture("assets/textures/Checkerboard.png");
-                component.SetSprite(TextureManager::GetTexture("assets/textures/Checkerboard.png").get());
+            if (ImGui::BeginDragDropTarget()) {
+                
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE_PAYLOAD"))
+                {
+                    const char* path = (const char*)payload->Data;
+                    std::filesystem::path texturePath(path);
+                    component.SetTexture(TextureManager::LoadTexture(texturePath.string()).get());
+                }
+                
+                ImGui::EndDragDropTarget();
             }
             
             ImGui::ColorEdit4("Tint Color", component.GetTint());

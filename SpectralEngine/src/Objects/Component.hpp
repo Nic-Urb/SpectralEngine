@@ -76,8 +76,11 @@ namespace Spectral {
         
         void OnRender(const Camera3D& camera) override;
         
-        void SetSprite(const Texture2D* texture)
+        void SetTexture(const Texture2D* texture)
         {
+            if (!texture) {
+                return;
+            }
             m_Texture = *texture;
             // temp
             m_Bounds.x = 0.0f;

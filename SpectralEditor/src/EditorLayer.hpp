@@ -7,6 +7,7 @@
 #include "Spectral.h"
 #include "Renderer/EditorCamera.hpp"
 #include "Panels/HierarchyPanel.hpp"
+#include "Panels/ContentBrowserPanel.hpp"
 
 class EditorLayer : public Spectral::Layer // @TODO: If selected context contains camera component -> draw visualization to show a camera position
 {
@@ -43,6 +44,7 @@ private:
     std::shared_ptr<Spectral::Scene> m_ActiveScene;
     Spectral::EditorCamera m_EditorCamera;
     Spectral::HierarchyPanel m_HierarchyPanel;
+    ContentBrowserPanel m_ContentBrowserPanel;
     
     RenderTexture m_Framebuffer;
     

@@ -37,11 +37,12 @@ namespace Spectral {
                 // find active runtime camera
                 if (cameraComponent->IsActive()) {
                     m_RuntimeCamera = cameraComponent->GetCamera();
+                } else {
+                    m_RuntimeCamera = nullptr; // @TODO: Investigate this 
                 }
             }
             v->OnUpdate(ts); // update each components
         }
-        m_RuntimeCamera = nullptr;
     }
 
     void Scene::OnRenderRuntime()

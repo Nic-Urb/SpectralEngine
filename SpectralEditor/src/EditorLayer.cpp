@@ -23,6 +23,7 @@ EditorLayer::EditorLayer()
     
     m_EditorCamera = Spectral::EditorCamera();
     m_HierarchyPanel= Spectral::HierarchyPanel(m_ActiveScene);
+    m_ContentBrowserPanel = ContentBrowserPanel();
     
     m_Framebuffer = LoadRenderTexture(GetScreenWidth(), GetScreenHeight()); // @TODO: Change size
     SetTextureFilter(m_Framebuffer.texture, TEXTURE_FILTER_BILINEAR);
@@ -105,6 +106,7 @@ void EditorLayer::OnImGuiRender()
     }
     
     m_HierarchyPanel.OnImGuiRender();
+    m_ContentBrowserPanel.OnImGuiRender();
     
     char buffer[128];
     std::string name = (m_CurrentState == SceneState::Edit) ? "Edit Mode" : "Play Mode";
