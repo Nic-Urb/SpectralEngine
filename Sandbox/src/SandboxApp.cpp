@@ -18,22 +18,26 @@ class SandboxLayer : public Spectral::Layer
 public:
     SandboxLayer()
     {
-        m_ActiveScene = std::make_shared<Spectral::Scene>();
+        m_ActiveScene = std::make_shared<Spectral::Scene>("SandboxScene");
         
         Spectral::TextureManager::LoadTexture("assets/textures/Checkerboard.png");
         
-        //auto comp1 = a->GetComponent<Spectral::SpriteComponent>();
-        //comp1->SetSprite(Spectral::TextureManager::GetTexture("assets/textures/Checkerboard.png"));
+        // create runtime cameras
+        auto cameraObj1 = m_ActiveScene->CreateObject<Spectral::Object>(Spectral::UUID());
+        cameraObj1->SetName("Camera1");
+        auto camera1 = cameraObj1->AddComponent<Spectral::CameraComponent>();
+        camera1->IsActive() = true;
         
-        //a->SetName("Static object 1");
-        //b->SetName("Static object 2");
+        auto cameraObj2 = m_ActiveScene->CreateObject<Spectral::Object>(Spectral::UUID());
+        cameraObj2->SetName("Camera2");
+        auto camera2 = cameraObj2->AddComponent<Spectral::CameraComponent>();
         
         
         // create static object
-        auto a = m_ActiveScene->CreateObject<Spectral::StaticObject>();
+        auto a = m_ActiveScene->CreateObject<Spectral::StaticObject>(Spectral::UUID());
         a->SetName("Test object");
         auto comp1 = a->GetComponent<Spectral::SpriteComponent>();
-        comp1->SetSprite(Spectral::TextureManager::GetTexture("assets/textures/Checkerboard.png").get());
+        comp1->SetTexture(Spectral::TextureManager::GetTexture("assets/textures/Checkerboard.png").get());
         SP_CLIENT_LOG_INFO("Object uuid: ({0})", a->GetUUID());
         
         m_Framebuffer = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());

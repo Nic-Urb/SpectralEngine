@@ -16,7 +16,8 @@ namespace Spectral {
     {
     public:
         UUID();
-        
+        UUID(uint64_t uuid);
+
         operator uint64_t() const { return m_UUID; }
         
     private:

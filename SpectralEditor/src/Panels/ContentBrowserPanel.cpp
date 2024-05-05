@@ -21,7 +21,7 @@ ContentBrowserPanel::ContentBrowserPanel()
     Spectral::TextureManager::LoadTexture("ressources/contentBrowser/file3d.png");
 }
 
-void ContentBrowserPanel::OnImGuiRender() // @TODO: implement SCENE drag&drop after serialization
+void ContentBrowserPanel::OnImGuiRender()
 {
     ImGui::Begin("Content Browser");
 
@@ -62,7 +62,6 @@ void ContentBrowserPanel::OnImGuiRender() // @TODO: implement SCENE drag&drop af
             {
                 iconTexture = Spectral::TextureManager::GetTexture("ressources/contentBrowser/directory.png").get();
             } else {
-                // @TODO: Add some more extensions support
                 if (path.extension() == ".spectral") {
                     iconTexture = Spectral::TextureManager::GetTexture("ressources/contentBrowser/filespectral.png").get();
                 }

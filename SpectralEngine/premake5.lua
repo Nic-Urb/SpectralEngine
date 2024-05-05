@@ -14,7 +14,9 @@ project "SpectralEngine"
         "src/**.h", 
         "src/**.hpp",
         "vendor/ImGuizmo/ImGuizmo.cpp",
-        "vendor/ImGuizmo/ImGuizmo.h"
+        "vendor/ImGuizmo/ImGuizmo.h",
+        "vendor/tinyfiledialogs/tinyfiledialogs.cpp",
+        "vendor/tinyfiledialogs/tinyfiledialogs.h"
     }
   
     includedirs { 

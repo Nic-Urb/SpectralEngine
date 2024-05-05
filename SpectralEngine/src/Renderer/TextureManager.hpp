@@ -20,9 +20,10 @@ namespace Spectral {
         static void UnloadAllTextures(); // @TODO: Call this in client's Layer
         
         static std::shared_ptr<Texture> GetTexture(const std::string& texturePath);
+        static std::string GetTexturePath(const Texture& texture);
         
         static bool TextureExists(const std::string& texturePath);
-        
+
     private:
         static std::unordered_map<std::string, std::shared_ptr<Texture>> m_TexturesRegistry;
         

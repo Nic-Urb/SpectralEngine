@@ -9,7 +9,9 @@
 #include "Panels/HierarchyPanel.hpp"
 #include "Panels/ContentBrowserPanel.hpp"
 
-class EditorLayer : public Spectral::Layer // @TODO: If selected context contains camera component -> draw visualization to show a camera position
+#include <filesystem>
+
+class EditorLayer : public Spectral::Layer // @TODO: Use Spectral namespace
 {
 public:
     EditorLayer();
@@ -51,6 +53,8 @@ private:
     SceneState m_CurrentState = SceneState::Edit;
     int m_CurrentGizmo = -1;
     
+    std::string m_CurrentScenePath; // path that points to current scene
+    
 private:
     void DrawToolbar();
     
@@ -59,4 +63,9 @@ private:
     
     void OnRuntimeStart();
     void OnRuntimeStop();
+    
+    void OpenFile();
+    void SaveFile();
+    void LoadFile(const std::string& path);
+    void QuickSave();
 };

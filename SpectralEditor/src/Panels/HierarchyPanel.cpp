@@ -28,7 +28,7 @@ namespace Spectral {
         if (m_Context)
         {
             // temp approach used to avoid modifying the container while iterating over it
-            std::vector<UUID> keys;
+            std::vector<uint64_t> keys;
             for (const auto& [k, _] : m_Context->m_ObjectRegistry)
             {
                 keys.push_back(k);
@@ -38,9 +38,6 @@ namespace Spectral {
             {
                 const auto& object = m_Context->m_ObjectRegistry[key];
                 DrawObjectNode(object.get());
-                
-                if (m_RemoveNode)
-                    RemoveObjectNode(key);
             }
             
             if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
@@ -53,33 +50,26 @@ namespace Spectral {
             {
                 if (ImGui::MenuItem("Create Empty Object"))
                 {
-                    // create object from context
-                    m_Context->CreateObject<Object>(/* name */);
+                    m_Context->CreateObject<Object>(UUID());
                 }
                 if (ImGui::MenuItem("Create Static Object"))
                 {
-                    m_Context->CreateObject<StaticObject>();
+                    m_Context->CreateObject<StaticObject>(UUID());
                 }
                 if (ImGui::MenuItem("Create Runtime Object"))
                 {
-                    m_Context->CreateObject<RuntimeObject>(/*params*/);
+                    m_Context->CreateObject<RuntimeObject>(UUID());
                 }
-                // @TODO: Add line space
-                // add here all new created objects
-                if (ImGui::MenuItem("Create Testing Object"))
-                {
-                    m_Context->CreateObject<RuntimeObject>(/*params*/);
-                }
+                // @TODO: Add line spaces
                 
                 ImGui::EndPopup();
             }
-            
         }
         ImGui::End();
         
         
         ImGui::Begin("Properties");
-        if (m_SelectedContext) {
+        if (m_SelectedContext != nullptr) {
             DrawProperties();
         }
         ImGui::End();
@@ -88,6 +78,7 @@ namespace Spectral {
     void HierarchyPanel::SetContext(const std::shared_ptr<Scene>& context) 
     {
         m_Context = context;
+        m_SelectedContext = nullptr;
     }
 
     void HierarchyPanel::DrawObjectNode(Object* object)
@@ -101,11 +92,11 @@ namespace Spectral {
             m_SelectedContext = object;
         }
         
+        bool removeNode = false;
         if (ImGui::BeginPopupContextItem())
         {
-            if (ImGui::MenuItem("Delete Entity"))
-            {
-                m_RemoveNode = true;
+            if (ImGui::MenuItem("Delete Entity")) {
+                removeNode = true;
             }
             ImGui::EndPopup();
         }
@@ -120,6 +111,22 @@ namespace Spectral {
             }
                         
             ImGui::TreePop();
+        }
+        
+        if (removeNode)
+        {
+            if (m_SelectedContext == object) {
+                m_SelectedContext = nullptr;
+            }
+            
+            SP_LOG_INFO("Trying to delete, here is uuid {0}", object->GetUUID());
+            
+            if (!m_Context->RemoveObject(object->GetUUID()))
+            {
+                // print some error
+            }
+            
+            removeNode = false;
         }
         
     }
@@ -161,7 +168,8 @@ namespace Spectral {
         DrawComponent<CameraComponent>("Camera", /*calling anonymous function*/ [](auto& component) {
             ImGui::Checkbox("IsActive?", &component.IsActive());
             
-            // @TODO: Position control sliders
+            // @TODO: Camera:  Position control sliders
+            // @TODO: Camera:  Camera persective change
             /*auto camera = component.GetCamera();
             ImGui::Text("Camera Position");
             ImGui::DragFloat("x", &camera->GetPosition().x, 0.01f, 0.0f, 0.0f, "%.2f");
@@ -184,14 +192,14 @@ namespace Spectral {
                 if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE_PAYLOAD"))
                 {
                     const char* path = (const char*)payload->Data;
-                    std::filesystem::path texturePath(path);
+                    std::filesystem::path texturePath(path); // @TODO: We actually don't need this step - there is a implicit from const char* to std::string
                     component.SetTexture(TextureManager::LoadTexture(texturePath.string()).get());
                 }
                 
                 ImGui::EndDragDropTarget();
             }
             
-            ImGui::ColorEdit4("Tint Color", component.GetTint());
+            ImGui::ColorEdit4("Tint Color", (float*)(void*)&component.GetTint());
         });
         
         
@@ -200,17 +208,6 @@ namespace Spectral {
         });
         
         
-    }
-
-    void HierarchyPanel::RemoveObjectNode(UUID uuid)
-    {
-        if (m_SelectedContext->GetUUID() == uuid)
-        {
-            m_SelectedContext = nullptr;
-        }
-        m_Context->RemoveObject(uuid);
-    
-        m_RemoveNode = false;
     }
 
     template <typename T, typename F>

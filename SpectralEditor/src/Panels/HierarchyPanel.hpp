@@ -22,13 +22,10 @@ namespace Spectral {
     private:
         std::shared_ptr<Scene> m_Context;
         Object* m_SelectedContext = nullptr;
-        bool m_RemoveNode = false;
         
     private:
         void DrawObjectNode(Object* object);
         void DrawProperties();
-        
-        void RemoveObjectNode(UUID uuid);
         
         template <typename T, typename F>
         void DrawComponent(const std::string& name, F&& lambda);

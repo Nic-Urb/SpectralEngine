@@ -62,7 +62,9 @@ namespace Spectral {
         
         //DrawTexturePro(m_Texture, m_Bounds, dest, Vector2{ dest.width * 0.5f, dest.height* 0.5f}, 0, ConvertToColor());
         DrawBillboard(camera, m_Texture, (Vector3){0.0f, 2.0f, 0.0f}, 150.0f, ConvertToColor()); // @TODO: Do this properly
-    
+        // @TODO: Switch to plane !
+        
+        
         if (transform) {
             transform->PopMatrix();
         }
@@ -72,10 +74,10 @@ namespace Spectral {
     Color SpriteComponent::ConvertToColor()
     {
         Color temp;
-        temp.r = m_Tint[0] * 255.0f;
-        temp.g = m_Tint[1] * 255.0f;
-        temp.b = m_Tint[2] * 255.0f;
-        temp.a = m_Tint[3] * 255.0f;
+        temp.r = m_Tint.x * 255.0f;
+        temp.g = m_Tint.y * 255.0f;
+        temp.b = m_Tint.z * 255.0f;
+        temp.a = m_Tint.w * 255.0f;
         
         return temp;
     }

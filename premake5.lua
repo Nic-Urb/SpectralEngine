@@ -41,6 +41,7 @@ IncludeDir["spdlog"] = "%{wks.location}/SpectralEngine/vendor/spdlog/include"
 IncludeDir["imgui"] = "%{wks.location}/SpectralEngine/vendor/imgui-master"
 IncludeDir["yaml_cpp"] = "%{wks.location}/SpectralEngine/vendor/yaml-cpp/include"
 IncludeDir["imguizmo"] = "%{wks.location}/SpectralEngine/vendor/ImGuizmo"
+IncludeDir["tinyfiledialogs"] = "%{wks.location}/SpectralEngine/vendor/tinyfiledialogs"
 --box2d
 
 group "Dependencies"
@@ -51,12 +52,7 @@ group "Dependencies"
 group "Core"
     include ("SpectralEngine")
     --include ("SpectralScript") 
-    --include ("Application/main")
 
 group "Tools"
     include ("SpectralEditor")
     include ("Sandbox")
-
-
-
---- look at this code on left side an mimic them ---

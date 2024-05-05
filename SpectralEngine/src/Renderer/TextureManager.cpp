@@ -18,7 +18,7 @@ namespace Spectral {
             return m_TexturesRegistry[texturePath];
         }
         
-        const Texture texture = ::LoadTexture(texturePath.c_str());
+        const Texture& texture = ::LoadTexture(texturePath.c_str());
         if (texture.id > 0) {
             std::shared_ptr<Texture> texturePtr = std::make_shared<Texture>(texture);
             m_TexturesRegistry[texturePath] = texturePtr;
@@ -57,6 +57,19 @@ namespace Spectral {
         
         SP_LOG_WARN("GetTetxture::Texture does not exist, can't access the texture!");
         return nullptr;
+    }
+
+    std::string TextureManager::GetTexturePath(const Texture& texture)
+    {
+        auto it = std::find_if(m_TexturesRegistry.begin(), m_TexturesRegistry.end(),
+                                   [&texture](const auto& v) { return v.second->id == texture.id; });
+
+        if (it == m_TexturesRegistry.end())
+        {
+            return "";
+        }
+                
+        return it->first;
     }
 
     bool TextureManager::TextureExists(const std::string& texturePath)

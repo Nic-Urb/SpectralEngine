@@ -90,13 +90,14 @@ namespace Spectral {
         }
         
         void SetBounds(const Rectangle& bounds) { m_Bounds = bounds; }
+        const Texture2D& GetTexture() { return m_Texture; }
         
-        float* GetTint() { return m_Tint; }
+        Vector4& GetTint() { return m_Tint; }
         
     private:
         Texture2D m_Texture;
         Rectangle m_Bounds;
-        float     m_Tint[4] = { 1.0f, 1.0f, 1.0f, 1.0f }; // RAYLIB::WHITE
+        Vector4 m_Tint = (Vector4){1.0f, 1.0f, 1.0f, 1.0f}; // RAYLIB::WHITE
         Vector2 m_Postion = {10.0f,10.0f}; // temp
         
     private:

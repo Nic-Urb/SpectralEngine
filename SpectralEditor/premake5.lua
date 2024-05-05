@@ -12,7 +12,7 @@ project "SpectralEditor"
         "src/**.c", 
         "src/**.cpp", 
         "src/**.h", 
-        "src/**.hpp"
+        "src/**.hpp",
     }
   
     includedirs { 
@@ -22,7 +22,8 @@ project "SpectralEditor"
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.imgui}",
         "%{IncludeDir.yaml_cpp}",
-        "%{IncludeDir.imguizmo}"
+        "%{IncludeDir.imguizmo}",
+        "%{IncludeDir.tinyfiledialogs}"
     }
 
     filter "action:xcode4"

@@ -3760,7 +3760,7 @@ void ImageDrawTextEx(Image *dst, Font font, const char *text, Vector2 position, 
 Texture2D LoadTexture(const char *fileName)
 {
     Texture2D texture = { 0 };
-
+    
     Image image = LoadImage(fileName);
 
     if (image.data != NULL)

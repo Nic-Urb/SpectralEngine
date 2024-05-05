@@ -8,6 +8,9 @@
 #include "Object.hpp"
 
 namespace Spectral {
+    
+    Object::Object(UUID uuid) : m_UUID(uuid)
+    {}
 
     Object::~Object()
     {
@@ -67,10 +70,16 @@ namespace Spectral {
 
 // ---- Static Object
 
-    StaticObject::StaticObject() : Object()
+    StaticObject::StaticObject(UUID uuid) : Object(uuid)
     {
         m_Transform = AddComponent<TransformComponent>();
         m_Sprite = AddComponent<SpriteComponent>();
     }
+
+
+// ---- Runtime Object
+
+    RuntimeObject::RuntimeObject(UUID uuid) : Object(uuid)
+    {}
     
 }
