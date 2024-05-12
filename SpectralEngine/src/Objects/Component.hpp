@@ -35,7 +35,7 @@ namespace Spectral {
         
         virtual void OnConstruct() {}
         virtual void OnDestroy() {}
-        virtual void OnRender(const Camera3D& camera) {}
+        virtual void OnRender() {}
         virtual void OnUpdate(Timestep ts) {}
         
     protected:
@@ -55,13 +55,10 @@ namespace Spectral {
             Vector3 Scale = {1.0f, 1.0f, 1.0f};
         };
         
+        Transform2D Transform;
+        
         void PushMatrix();
         void PopMatrix();
-        
-        Transform2D& GetTransform() { return m_Transform; }
-        
-    private:
-        Transform2D m_Transform;
         
     };
 
@@ -71,31 +68,13 @@ namespace Spectral {
     public:
         DECLARE_COMPONENT(SpriteComponent)
         
-        void OnRender(const Camera3D& camera) override;
+        Texture2D SpriteTexture;
+        Vector4   Tint = (Vector4){1.0f, 1.0f, 1.0f, 1.0f}; // RAYLIB::WHITE
         
-        void SetTexture(const Texture2D* texture)
-        {
-            if (!texture) {
-                return;
-            }
-            m_Texture = *texture;
-            // temp
-            m_Bounds.x = 0.0f;
-            m_Bounds.y = 0.0f;
-            m_Bounds.width = m_Texture.width;
-            m_Bounds.height = m_Texture.height;
-        }
-        
-        void SetBounds(const Rectangle& bounds) { m_Bounds = bounds; }
-        const Texture2D& GetTexture() { return m_Texture; }
-        
-        Vector4& GetTint() { return m_Tint; }
-        
+        void OnRender() override;
+
     private:
-        Texture2D m_Texture;
         Rectangle m_Bounds;
-        Vector4 m_Tint = (Vector4){1.0f, 1.0f, 1.0f, 1.0f}; // RAYLIB::WHITE
-        Vector2 m_Postion = {10.0f,10.0f}; // temp
         
     private:
         Color ConvertToColor();
@@ -113,14 +92,11 @@ namespace Spectral {
     public:
         DECLARE_COMPONENT(CameraComponent)
         
-        void OnConstruct() override { m_Camera = std::make_shared<RuntimeCamera>(); }
+        std::shared_ptr<RuntimeCamera> Camera;
+        bool Active = false;
         
-        std::shared_ptr<RuntimeCamera> GetCamera() { return m_Camera; }
-        bool& IsActive() { return m_Active; }
-        
-    private:
-        std::shared_ptr<RuntimeCamera> m_Camera;
-        bool m_Active = false;
+        void OnConstruct() override { Camera = std::make_shared<RuntimeCamera>(); }
+
     };
 
 }

@@ -166,11 +166,11 @@ namespace Spectral {
         
         
         DrawComponent<CameraComponent>("Camera", /*calling anonymous function*/ [](auto& component) {
-            ImGui::Checkbox("IsActive?", &component.IsActive());
+            ImGui::Checkbox("IsActive?", &component.Active);
             
             // @TODO: Camera:  Position control sliders
             // @TODO: Camera:  Camera persective change
-            /*auto camera = component.GetCamera();
+            /*auto camera = component.Camera;
             ImGui::Text("Camera Position");
             ImGui::DragFloat("x", &camera->GetPosition().x, 0.01f, 0.0f, 0.0f, "%.2f");
             ImGui::DragFloat("y", &camera->GetPosition().y, 0.01f, 0.0f, 0.0f, "%.2f");*/
@@ -178,13 +178,13 @@ namespace Spectral {
         
         
         DrawComponent<TransformComponent>("Transform", /*calling anonymous function*/ [](auto& component) {
-            DrawVector3Control("Translation", component.GetTransform().Translation);
-            DrawVector3Control("Rotation", component.GetTransform().Rotation);
-            DrawVector3Control("Scale", component.GetTransform().Scale);
+            DrawVector3Control("Translation", component.Transform.Translation);
+            DrawVector3Control("Rotation", component.Transform.Rotation);
+            DrawVector3Control("Scale", component.Transform.Scale);
         });
         
         
-        DrawComponent<SpriteComponent>("Sprite", /*calling anonymous function*/ [](auto& component) {
+        DrawComponent<SpriteComponent>("Sprite", /*calling anonymous function*/ [](auto& component) {            
             ImGui::Button("Load Texture", ImVec2(100.0f, 0.0f));
             
             if (ImGui::BeginDragDropTarget()) {
@@ -193,13 +193,13 @@ namespace Spectral {
                 {
                     const char* path = (const char*)payload->Data;
                     std::filesystem::path texturePath(path); // @TODO: We actually don't need this step - there is a implicit from const char* to std::string
-                    component.SetTexture(TextureManager::LoadTexture(texturePath.string()).get());
+                    component.SpriteTexture = *TextureManager::LoadTexture(texturePath.string()).get();
                 }
                 
                 ImGui::EndDragDropTarget();
             }
             
-            ImGui::ColorEdit4("Tint Color", (float*)(void*)&component.GetTint());
+            ImGui::ColorEdit4("Tint Color", (float*)(void*)&component.Tint);
         });
         
         

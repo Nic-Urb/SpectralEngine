@@ -36,8 +36,8 @@ namespace Spectral {
             if (cameraComponent)
             {
                 // find active runtime camera
-                if (cameraComponent->IsActive()) {
-                    m_RuntimeCamera = cameraComponent->GetCamera();
+                if (cameraComponent->Active) {
+                    m_RuntimeCamera = cameraComponent->Camera;
                 } else {
                     m_RuntimeCamera = nullptr; // @TODO: Investigate this 
                 }
@@ -58,7 +58,7 @@ namespace Spectral {
                     SpriteComponent* spriteComponent = v->GetComponent<SpriteComponent>();
                     if (spriteComponent)
                     {
-                        spriteComponent->OnRender(m_RuntimeCamera->GetCamera3D());
+                        spriteComponent->OnRender();
                     }
                 }
             
@@ -81,7 +81,7 @@ namespace Spectral {
                 SpriteComponent* spriteComponent = v->GetComponent<SpriteComponent>();
                 if (spriteComponent)
                 {
-                    spriteComponent->OnRender(camera.GetCamera3D());
+                    spriteComponent->OnRender();
                 }
             }
         

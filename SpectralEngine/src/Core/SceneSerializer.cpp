@@ -126,9 +126,9 @@ namespace Spectral {
             out << YAML::BeginMap; // TransformComponent
             
             TransformComponent& tc = *obj->GetComponent<TransformComponent>();
-            out << YAML::Key << "Translation" << YAML::Value << tc.GetTransform().Translation;
-            out << YAML::Key << "Rotation" << YAML::Value << tc.GetTransform().Rotation;
-            out << YAML::Key << "Scale" << YAML::Value << tc.GetTransform().Scale;
+            out << YAML::Key << "Translation" << YAML::Value << tc.Transform.Translation;
+            out << YAML::Key << "Rotation" << YAML::Value << tc.Transform.Rotation;
+            out << YAML::Key << "Scale" << YAML::Value << tc.Transform.Scale;
             
             out << YAML::EndMap; // TransformComponent
         }
@@ -139,8 +139,8 @@ namespace Spectral {
             out << YAML::BeginMap; // SpriteComponent
             
             SpriteComponent& sc = *obj->GetComponent<SpriteComponent>();
-            out << YAML::Key << "Texture" << YAML::Value << TextureManager::GetTexturePath(sc.GetTexture());
-            out << YAML::Key << "Tint" << YAML::Value << sc.GetTint();
+            out << YAML::Key << "Texture" << YAML::Value << TextureManager::GetTexturePath(sc.SpriteTexture);
+            out << YAML::Key << "Tint" << YAML::Value << sc.Tint;
             
             out << YAML::EndMap; // SpriteComponent
         }
@@ -151,7 +151,7 @@ namespace Spectral {
             out << YAML::BeginMap; // CameraComponent
             
             CameraComponent& cc = *obj->GetComponent<CameraComponent>();
-            out << YAML::Key << "Active" << YAML::Value << cc.IsActive();
+            out << YAML::Key << "Active" << YAML::Value << cc.Active;
             
             out << YAML::EndMap; // CameraComponent
         }
@@ -239,24 +239,24 @@ namespace Spectral {
                 if (transformComponent)
                 {
                     TransformComponent& tc = *obj->GetOrAddComponent<TransformComponent>();
-                    tc.GetTransform().Translation = transformComponent["Translation"].as<Vector3>();
-                    tc.GetTransform().Rotation = transformComponent["Rotation"].as<Vector3>();
-                    tc.GetTransform().Scale = transformComponent["Scale"].as<Vector3>();
+                    tc.Transform.Translation = transformComponent["Translation"].as<Vector3>();
+                    tc.Transform.Rotation = transformComponent["Rotation"].as<Vector3>();
+                    tc.Transform.Scale = transformComponent["Scale"].as<Vector3>();
                 }
                 
                 auto spriteComponent = object["SpriteComponent"];
                 if (spriteComponent)
                 {
                     SpriteComponent& sc = *obj->GetOrAddComponent<SpriteComponent>();
-                    sc.SetTexture(TextureManager::LoadTexture(spriteComponent["Texture"].as<std::string>()).get());
-                    sc.GetTint() = spriteComponent["Tint"].as<Vector4>();
+                    sc.SpriteTexture = *TextureManager::LoadTexture(spriteComponent["Texture"].as<std::string>()).get();
+                    sc.Tint = spriteComponent["Tint"].as<Vector4>();
                 }
                 
                 auto cameraComponent = object["CameraComponent"];
                 if (cameraComponent) 
                 {
                     CameraComponent& cc = *obj->GetOrAddComponent<CameraComponent>();
-                    cc.IsActive() = cameraComponent["Active"].as<bool>();
+                    cc.Active = cameraComponent["Active"].as<bool>();
                 }
                 
             }

@@ -982,6 +982,32 @@ void DrawPlane(Vector3 centerPos, Vector2 size, Color color)
     rlPopMatrix();
 }
 
+// Draw a textured plane
+// Added by Nicolas Urbanek
+void DrawTexturedPlane(Texture2D texture, Vector3 position, Vector2 size, Color tint)
+{
+    rlCheckRenderBatchLimit(4);
+    rlSetTexture(texture.id);
+    
+    rlPushMatrix();
+        rlTranslatef(position.x, position.y, position.z);
+        rlScalef(size.x, 1.0f, size.y);
+    
+        rlBegin(RL_QUADS);
+            rlColor4ub(tint.r, tint.g, tint.b, tint.a);
+            rlNormal3f(0.0f, 1.0f, 0.0f);                                   // Normal pointing up
+    
+            rlTexCoord2f(0.0f, 0.0f); rlVertex3f(-0.5f, 0.0f, -0.5f);       // Bottom left of the texture and quad
+            rlTexCoord2f(0.0f, 1.0f); rlVertex3f(-0.5f, 0.0f, 0.5f);        // Top left of the texture and quad
+            rlTexCoord2f(1.0f, 1.0f); rlVertex3f(0.5f, 0.0f, 0.5f);         // Top right of the texture and quad
+            rlTexCoord2f(1.0f, 0.0f); rlVertex3f(0.5f, 0.0f, -0.5f);        // Bottom right of the texture and quad
+            
+        rlEnd();
+    rlPopMatrix();
+    
+    rlSetTexture(0);
+}
+
 // Draw a ray line
 void DrawRay(Ray ray, Color color)
 {

@@ -265,7 +265,7 @@ void EditorLayer::OnGizmoUpdate()
             
         // recompose matrix
         float transformMatrix[4 * 4];
-        ImGuizmo::RecomposeMatrixFromComponents(Vector3ToFloat(tc->GetTransform().Translation), Vector3ToFloat(tc->GetTransform().Rotation), Vector3ToFloat(tc->GetTransform().Scale), transformMatrix);
+        ImGuizmo::RecomposeMatrixFromComponents(Vector3ToFloat(tc->Transform.Translation), Vector3ToFloat(tc->Transform.Rotation), Vector3ToFloat(tc->Transform.Scale), transformMatrix);
             
         // snapping
         bool snap = IsKeyDown(KEY_LEFT_CONTROL);
@@ -285,9 +285,9 @@ void EditorLayer::OnGizmoUpdate()
 
             ImGuizmo::DecomposeMatrixToComponents(transformMatrix, translation, rotation, scale);
                 
-            tc->GetTransform().Translation = {translation[0], translation[1], translation[2]};
-            tc->GetTransform().Rotation = {rotation[0], rotation[1], rotation[2]};
-            tc->GetTransform().Scale = {scale[0], scale[1], scale[2]};
+            tc->Transform.Translation = {translation[0], translation[1], translation[2]};
+            tc->Transform.Rotation = {rotation[0], rotation[1], rotation[2]};
+            tc->Transform.Scale = {scale[0], scale[1], scale[2]};
         }
     }
 }
