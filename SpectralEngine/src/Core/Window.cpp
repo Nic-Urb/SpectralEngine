@@ -61,7 +61,6 @@ namespace Spectral {
     void Window::SetVSync(bool enabled)
     {
         // use gl for setting vsync off/on
-        
     }
 }
 

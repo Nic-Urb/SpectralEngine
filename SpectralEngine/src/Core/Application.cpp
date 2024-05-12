@@ -16,8 +16,11 @@
 
 namespace Spectral {
 
+    Application* Application::s_Instance = nullptr;
+
     Application::Application(const std::string& name)
     {
+        s_Instance = this;
         m_Window = std::make_unique<Window>(name);
         
         // m_ImGuiLayer = new ImGuiLayer();
@@ -31,12 +34,6 @@ namespace Spectral {
         //ScriptEngine::Shutdown();
     }
 
-    Application& Application::GetInstance()
-    {
-        static Application* instance;
-        return *instance;
-    }
-
     void Application::Run()
     {
         SP_LOG_INFO("Engine::Run");
@@ -46,12 +43,12 @@ namespace Spectral {
         while (!WindowShouldClose())
         {
             float time = (float)GetTime();
-            float timestep = time - lastFrameTime;
+            m_Timestep = time - lastFrameTime;
             
             lastFrameTime = time;
             
             for (Layer* layer : m_LayerStack) {
-                layer->OnUpdate(timestep);
+                layer->OnUpdate(m_Timestep);
             }
 
             BeginDrawing();

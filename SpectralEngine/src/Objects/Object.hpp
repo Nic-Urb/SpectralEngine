@@ -13,7 +13,8 @@
 #include "Core/Timestep.h"
 #include "Core/UUID.hpp"
 
-// @TODO: Declare Macro for setting up an constructor for all classes, also add OnConstruct function!
+#define DECLARE_OBJECT(T) \
+    T(UUID uuid) : Object(uuid) {}
 
 namespace Spectral {
 
@@ -25,7 +26,7 @@ namespace Spectral {
         ~Object(/*@TODO: Call to remove all components*/);
         
         template <typename T>
-        T* AddComponent()  // @TODO: declaration put into .cpp file
+        T* AddComponent()
         {
             // ensure on compile-time that we only try to add a class derives from Component
             static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
@@ -41,7 +42,7 @@ namespace Spectral {
         }
         
         template <typename T>
-        T* GetComponent()  // @TODO: declaration put into .cpp file
+        T* GetComponent()
         {
             // ensure on compile-time that we only try to add a class derives from Component
             static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
@@ -55,20 +56,19 @@ namespace Spectral {
         }
         
         template <typename T>
-        T* GetOrAddComponent() // @TODO: declaration put into .cpp file
+        T* GetOrAddComponent()
         {
             // ensure on compile-time that we only try to add a class derives from Component
             static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
             
             uint32_t id = T::GetComponentId();
-            
             if (HasComponent(id))
             {
                 // return this component
                 return static_cast<T*>(m_Components[id].get());
             }
             
-            // create and add component // @TODO: Remove
+            // create and add component
             std::unique_ptr<T> component = std::make_unique<T>(*this);
             component->OnConstruct();
             m_Components.emplace(id, std::move(component));
@@ -90,8 +90,10 @@ namespace Spectral {
         UUID GetUUID() const { return m_UUID; }
         
         virtual const char* GetClassName() { return "Object"; }
-        
-        virtual void OnUpdate(Timestep ts); // optional
+        // optional
+        virtual void OnUpdate(Timestep ts);
+        virtual void OnConstruct() {};
+        virtual void OnDestroy() {};
     
     protected:
         std::unordered_map<uint32_t, std::unique_ptr<Component>> m_Components;
@@ -107,7 +109,9 @@ namespace Spectral {
     class StaticObject : public Object
     {
     public:
-        StaticObject(UUID uuid);
+        DECLARE_OBJECT(StaticObject);
+        
+        void OnConstruct() override;
         
         const char * GetClassName() override { return "StaticObject"; }
         
@@ -124,7 +128,7 @@ namespace Spectral {
     class RuntimeObject : public Object // @TODO: This should contains scriptcomponent by default
     {
     public:
-        RuntimeObject(UUID uuid);
+        DECLARE_OBJECT(RuntimeObject);
         
         const char * GetClassName() override { return "RuntimeObject"; }
         

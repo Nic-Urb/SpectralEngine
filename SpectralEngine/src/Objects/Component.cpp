@@ -50,7 +50,7 @@ namespace Spectral {
             return;
         }
         
-        TransformComponent* transform = GetOwner().GetComponent<TransformComponent>();
+        TransformComponent* transform = m_Owner.GetComponent<TransformComponent>();
         
         if (transform) {
             transform->PushMatrix();

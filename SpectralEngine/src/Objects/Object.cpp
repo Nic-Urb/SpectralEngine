@@ -70,16 +70,14 @@ namespace Spectral {
 
 // ---- Static Object
 
-    StaticObject::StaticObject(UUID uuid) : Object(uuid)
+    void StaticObject::OnConstruct()
     {
         m_Transform = AddComponent<TransformComponent>();
         m_Sprite = AddComponent<SpriteComponent>();
     }
 
-
 // ---- Runtime Object
 
-    RuntimeObject::RuntimeObject(UUID uuid) : Object(uuid)
-    {}
+    
     
 }

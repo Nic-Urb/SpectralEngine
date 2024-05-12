@@ -31,6 +31,7 @@ namespace Spectral {
             static_assert(std::is_base_of_v<Object, T>, "T must derive from Object");
             
             std::unique_ptr<T> object = std::make_unique<T>(uuid);
+            object->OnConstruct();
             m_ObjectRegistry.emplace(uuid, std::move(object));
             
             return static_cast<T*>(m_ObjectRegistry[uuid].get());

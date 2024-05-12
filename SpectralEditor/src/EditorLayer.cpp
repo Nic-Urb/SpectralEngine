@@ -9,8 +9,11 @@
 
 #include "Core/SceneSerializer.hpp"
 
+#include "Panels/StatisticsPanel.hpp"
+
 #include "rlImGui.h"
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "raymath.h"
 #include "ImGuizmo.h"
 #include "tinyfiledialogs.h"
@@ -30,31 +33,45 @@ EditorLayer::EditorLayer()
     m_HierarchyPanel= Spectral::HierarchyPanel(m_ActiveScene);
     m_ContentBrowserPanel = ContentBrowserPanel();
     
+    m_Panels.emplace_back(std::make_unique<StatisticsPanel>());
+    
     m_Framebuffer = LoadRenderTexture(GetScreenWidth(), GetScreenHeight()); // @TODO: Change size
     SetTextureFilter(m_Framebuffer.texture, TEXTURE_FILTER_BILINEAR);
 }
 
 void EditorLayer::OnUpdate(Spectral::Timestep ts)
 {
-    if (m_CurrentState == SceneState::Edit)
+    if (IsWindowResized())
     {
-        m_EditorCamera.OnUpdate(ts);
-    } else {
-        m_ActiveScene->OnUpdateRuntime(ts);
+        UnloadRenderTexture(m_Framebuffer);
+        m_Framebuffer = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
     }
     
-    // handle input events for shortcuts
-    if (IsKeyPressed(KEY_Q)) {
-        m_CurrentGizmo = -1;
+    if (m_CurrentState == SceneState::Play)
+    {
+        m_ActiveScene->OnUpdateRuntime(ts);
     }
-    if (IsKeyPressed(KEY_T)) {
-        m_CurrentGizmo = ImGuizmo::OPERATION::TRANSLATE;
-    }
-    if (IsKeyPressed(KEY_E)) {
-        m_CurrentGizmo = ImGuizmo::OPERATION::SCALE;
-    }
-    if (IsKeyPressed(KEY_R)) {
-        m_CurrentGizmo = ImGuizmo::OPERATION::ROTATE;
+
+    if (m_ViewportFocused)
+    {
+        if (m_CurrentState == SceneState::Edit)
+        {
+            m_EditorCamera.OnUpdate(ts);
+        }
+        
+        // handle input events for gizmo shortcuts
+        if (IsKeyPressed(KEY_Q)) {
+            m_CurrentGizmo = -1;
+        }
+        if (IsKeyPressed(KEY_T)) {
+            m_CurrentGizmo = ImGuizmo::OPERATION::TRANSLATE;
+        }
+        if (IsKeyPressed(KEY_E)) {
+            m_CurrentGizmo = ImGuizmo::OPERATION::SCALE;
+        }
+        if (IsKeyPressed(KEY_R)) {
+            m_CurrentGizmo = ImGuizmo::OPERATION::ROTATE;
+        }
     }
     
     // multiple keys events for shortcuts
@@ -89,60 +106,91 @@ void EditorLayer::OnImGuiRender()
     // create a docking space
     ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
     
-    if (ImGui::BeginMainMenuBar())
+    
+    // create main menu bar // @TODO: Draw menubars in seperate function !
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
+    float height = ImGui::GetFrameHeight();
+    
+    if (ImGui::BeginViewportSideBar("##MainMenuBar", ImGui::GetMainViewport(), ImGuiDir_Up, height, flags))
     {
-        if (ImGui::BeginMenu("File")) 
+        if (ImGui::BeginMenuBar())
         {
-            if (ImGui::MenuItem("Save","Command+S")) {
-                QuickSave();
+            if (ImGui::BeginMenu("File"))
+            {
+                if (ImGui::MenuItem("Save","Command+S")) {
+                    QuickSave();
+                }
+                
+                if (ImGui::MenuItem("Save as...","Shift+Command+S")) {
+                    SaveFile();
+                }
+                
+                if (ImGui::MenuItem("Open...", "Command+O")) {
+                    OpenFile();
+                }
+                
+                ImGui::EndMenu();
             }
             
-            if (ImGui::MenuItem("Save as...","Shift+Command+S")) {
-                SaveFile();
+            if (ImGui::BeginMenu("Options"))
+            {
+                
+                ImGui::EndMenu();
             }
             
-            if (ImGui::MenuItem("Open...", "Command+O")) {
-                OpenFile();
+            if (ImGui::BeginMenu("Tools"))
+            {
+                for (const auto& panel : m_Panels)
+                {
+                    bool isActive = panel->IsActive();
+                    if (ImGui::MenuItem(panel->GetName().c_str(), nullptr, &isActive)) {
+                        panel->SetActive(isActive);
+                    }
+                }
+                
+                ImGui::EndMenu();
             }
             
-            ImGui::EndMenu();
-        }
-        
-        if (ImGui::BeginMenu("Options")) 
-        {
+            if (ImGui::BeginMenu("Help"))
+            {
+                
+                ImGui::EndMenu();
+            }
             
-            ImGui::EndMenu();
+            ImGui::EndMenuBar();
         }
-        
-        if (ImGui::BeginMenu("Tools"))
-        {
+        ImGui::End();
+    }
+    // create secondary menu bar
+    if (ImGui::BeginViewportSideBar("##SecondaryMenuBar", ImGui::GetMainViewport(), ImGuiDir_Up, height, flags))
+    {
+        if (ImGui::BeginMenuBar()) {
+            DrawToolbar();
             
-            ImGui::EndMenu();
+            ImGui::EndMenuBar();
         }
-        
-        if (ImGui::BeginMenu("Help")) 
-        {
-            
-            ImGui::EndMenu();
-        }
-        
-        DrawToolbar();
-        
-        // frame time counter
-        ImGui::SameLine(ImGui::GetWindowWidth()-200.0f);
-        ImGui::Text(" %i Client FPS (%.2f ms)", GetFPS(), GetFrameTime()*1000.0f);
-        
-        ImGui::EndMainMenuBar();
+        ImGui::End();
     }
     
+    // render panels
     m_HierarchyPanel.OnImGuiRender();
     m_ContentBrowserPanel.OnImGuiRender();
     
+    for (const auto& panel : m_Panels) {
+        if (panel->IsActive()) {
+            panel->OnImGuiRender();
+        }
+    }
+    
+    // render viewport
     char buffer[128];
     std::string name = (m_CurrentState == SceneState::Edit) ? "Edit Mode" : "Play Mode";
     snprintf(buffer, sizeof(buffer), "%s (%s)###Viewport",m_ActiveScene->GetName().c_str() ,name.c_str());
-    ImGui::Begin(buffer);
-        rlImGuiImageRenderTextureFit(&m_Framebuffer, true); // render framebuffer to imgui viewport
+    ImGui::Begin(buffer, nullptr, ImGuiWindowFlags_NoScrollbar);
+        m_ViewportFocused = ImGui::IsWindowHovered();
+    
+        ImVec2 viewportRegion = ImGui::GetContentRegionAvail();
+        ImGui::Image((ImTextureID)&m_Framebuffer.texture, viewportRegion, ImVec2(0,1), ImVec2(1,0)); // render framebuffer to imgui viewport
         
         if (ImGui::BeginDragDropTarget())
         {
@@ -151,22 +199,12 @@ void EditorLayer::OnImGuiRender()
                 const char* path = (const char*)payload->Data;
                 LoadFile(path);
             }
-            
             ImGui::EndDragDropTarget();
         }
     
         if (m_CurrentState == SceneState::Edit) {
             OnGizmoUpdate(); // updates and render gizmo only in editor mode
         }
-    ImGui::End();
-    
-    if (ImGui::Begin("Engine Stats")) { // @TODO: Do as seperate panel class
-        ImGuiIO& io = ImGui::GetIO();
-        if (ImGui::IsMousePosValid())
-        {
-            ImGui::Text("Mouse Position: (%.1f,%.1f)", io.MousePos.x, io.MousePos.y);
-        }
-    }
     ImGui::End();
 }
 

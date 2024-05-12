@@ -39,9 +39,6 @@ namespace Spectral {
         virtual void OnUpdate(Timestep ts) {}
         
     protected:
-        Object& GetOwner() const { return m_Owner; }
-        
-    private:
         Object& m_Owner;
         
     };

@@ -20,6 +20,7 @@ namespace Spectral {
         
         if (it != m_ObjectRegistry.end())
         {
+            it->second->OnDestroy();
             m_ObjectRegistry.erase(it);
             return true;
         }

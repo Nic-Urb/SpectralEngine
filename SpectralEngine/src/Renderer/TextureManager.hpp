@@ -23,6 +23,16 @@ namespace Spectral {
         static std::string GetTexturePath(const Texture& texture);
         
         static bool TextureExists(const std::string& texturePath);
+        
+        static size_t GetLoadedTextureCount()  { return m_TexturesRegistry.size(); }
+        
+        /* @TODO:
+         Stats {
+            LoadedTextures;
+            LoadedModels;
+            ....
+         }
+         */
 
     private:
         static std::unordered_map<std::string, std::shared_ptr<Texture>> m_TexturesRegistry;

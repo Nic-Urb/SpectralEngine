@@ -8,8 +8,7 @@
 #include "Renderer/EditorCamera.hpp"
 #include "Panels/HierarchyPanel.hpp"
 #include "Panels/ContentBrowserPanel.hpp"
-
-#include <filesystem>
+#include "Panels/Panel.hpp"
 
 class EditorLayer : public Spectral::Layer // @TODO: Use Spectral namespace
 {
@@ -45,10 +44,17 @@ private:
 private:
     std::shared_ptr<Spectral::Scene> m_ActiveScene;
     Spectral::EditorCamera m_EditorCamera;
+    
+    // Panels where lifetime is tied to the EditorLayer class
     Spectral::HierarchyPanel m_HierarchyPanel;
     ContentBrowserPanel m_ContentBrowserPanel;
     
+    // Panels derived from Panel class
+    std::vector<std::unique_ptr<Panel>> m_Panels;
+    
     RenderTexture m_Framebuffer;
+    
+    bool m_ViewportFocused;
     
     SceneState m_CurrentState = SceneState::Edit;
     int m_CurrentGizmo = -1;
