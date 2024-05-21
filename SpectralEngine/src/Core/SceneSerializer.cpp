@@ -152,6 +152,8 @@ namespace Spectral {
             
             CameraComponent& cc = *obj->GetComponent<CameraComponent>();
             out << YAML::Key << "Active" << YAML::Value << cc.Active;
+            out << YAML::Key << "Projection" << YAML::Value << cc.Camera->GetCamera3D().projection;
+            out << YAML::Key << "FOV" << YAML::Value << cc.Camera->GetCamera3D().fovy;
             
             out << YAML::EndMap; // CameraComponent
         }
@@ -257,6 +259,8 @@ namespace Spectral {
                 {
                     CameraComponent& cc = *obj->GetOrAddComponent<CameraComponent>();
                     cc.Active = cameraComponent["Active"].as<bool>();
+                    cc.Camera->GetCamera3D().projection = cameraComponent["Projection"].as<int>();
+                    cc.Camera->GetCamera3D().fovy = cameraComponent["FOV"].as<float>();
                 }
                 
             }

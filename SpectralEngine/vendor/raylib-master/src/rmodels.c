@@ -989,6 +989,7 @@ void DrawTexturedPlane(Texture2D texture, Vector3 position, Vector2 size, Color 
     rlCheckRenderBatchLimit(4);
     rlSetTexture(texture.id);
     
+    // NOTE: The plane is always created on the XZ ground (same as DrawPlane())
     rlPushMatrix();
         rlTranslatef(position.x, position.y, position.z);
         rlScalef(size.x, 1.0f, size.y);

@@ -38,6 +38,8 @@ namespace Spectral {
         virtual void OnRender() {}
         virtual void OnUpdate(Timestep ts) {}
         
+        Object& GetOwner(){ return m_Owner; }
+        
     protected:
         Object& m_Owner;
         
@@ -70,11 +72,13 @@ namespace Spectral {
         
         Texture2D SpriteTexture;
         Vector4   Tint = (Vector4){1.0f, 1.0f, 1.0f, 1.0f}; // RAYLIB::WHITE
+        Vector3 Bounds[4];
         
+        void OnUpdate(Timestep ts) override;
         void OnRender() override;
-
+        
     private:
-        Rectangle m_Bounds;
+        Vector3 m_OriginPosition = (Vector3){0.0f, 2.0f, 0.0f};
         
     private:
         Color ConvertToColor();
@@ -94,8 +98,10 @@ namespace Spectral {
         
         std::shared_ptr<RuntimeCamera> Camera;
         bool Active = false;
+        bool Debug = false;
         
-        void OnConstruct() override { Camera = std::make_shared<RuntimeCamera>(); }
+        void OnConstruct() override;
+        void OnRender() override;
 
     };
 

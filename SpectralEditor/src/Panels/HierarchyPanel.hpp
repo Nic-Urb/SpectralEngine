@@ -16,7 +16,8 @@ namespace Spectral {
         
         void OnImGuiRender();
         
-        Object* GetSelectedContext() { return m_SelectedContext; }
+        Object* GetSelectedObject() { return m_SelectedContext; }
+        void SetSelectedObject(Object* object) { m_SelectedContext = object; }
         void SetContext(const std::shared_ptr<Scene>& context);
         
     private:

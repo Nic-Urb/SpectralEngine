@@ -167,13 +167,32 @@ namespace Spectral {
         
         DrawComponent<CameraComponent>("Camera", /*calling anonymous function*/ [](auto& component) {
             ImGui::Checkbox("IsActive?", &component.Active);
+            ImGui::Checkbox("Debug?", &component.Debug);
             
-            // @TODO: Camera:  Position control sliders
-            // @TODO: Camera:  Camera persective change
-            /*auto camera = component.Camera;
-            ImGui::Text("Camera Position");
-            ImGui::DragFloat("x", &camera->GetPosition().x, 0.01f, 0.0f, 0.0f, "%.2f");
-            ImGui::DragFloat("y", &camera->GetPosition().y, 0.01f, 0.0f, 0.0f, "%.2f");*/
+            auto camera = component.Camera;
+            
+            bool isPerspective = (camera->GetCamera3D().projection == CAMERA_PERSPECTIVE) ? true : false;
+            
+            ImGui::Text("Projection");
+            if (ImGui::BeginCombo("##Projection", isPerspective ? "Perspective" : "Orthographic"))
+            {
+                if (ImGui::Selectable("Perspective", isPerspective)) 
+                {
+                    isPerspective = true;
+                    camera->ChangeProjection(CAMERA_PERSPECTIVE);
+                }
+                
+                if (ImGui::Selectable("Orthographic", !isPerspective)) 
+                {
+                    isPerspective = false;
+                    camera->ChangeProjection(CAMERA_ORTHOGRAPHIC);
+                }
+                
+                ImGui::EndCombo();
+            }
+            
+            ImGui::Text("FOV");
+            ImGui::SliderFloat("##FOVSlider", &camera->GetCamera3D().fovy, 1.0f, 180.0f, "%.1f");
         });
         
         

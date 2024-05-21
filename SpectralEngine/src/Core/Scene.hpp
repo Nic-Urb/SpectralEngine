@@ -46,8 +46,10 @@ namespace Spectral {
         void OnUpdateRuntime(Timestep ts);
         void OnRenderRuntime();
         
-        void OnRenderEditor(EditorCamera& camera); // this update should be called from client layer update function
+        void OnUpdateEditor(Timestep ts);
+        void OnRenderEditor(EditorCamera& camera, const RayCollision& collisionInfo); // this update should be called from client layer update function
         
+        const size_t GetObjectCount() const { return m_ObjectRegistry.size(); }
         const std::string& GetName() { return m_Name; }
         
     private:
@@ -58,5 +60,6 @@ namespace Spectral {
         // allow access to private members
         friend class SceneSerializer;
         friend class HierarchyPanel;
+        friend class EditorLayer;
     };
 }

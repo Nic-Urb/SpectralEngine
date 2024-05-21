@@ -18,7 +18,7 @@ public:
     
     EditorApp() : Spectral::Application("[SpectralEditor - Applicaton]")
     {
-        PushLayer(new EditorLayer());
+        PushLayer(new Spectral::EditorLayer());
         SP_CLIENT_LOG_INFO("EDITOR-APP::Run");
     }
     

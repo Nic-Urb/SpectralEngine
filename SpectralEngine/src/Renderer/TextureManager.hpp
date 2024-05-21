@@ -24,7 +24,7 @@ namespace Spectral {
         
         static bool TextureExists(const std::string& texturePath);
         
-        static size_t GetLoadedTextureCount()  { return m_TexturesRegistry.size(); }
+        static size_t GetLoadedTextureCount() { return m_TexturesRegistry.size(); }
         
         /* @TODO:
          Stats {
