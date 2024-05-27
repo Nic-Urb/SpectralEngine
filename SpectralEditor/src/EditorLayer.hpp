@@ -65,6 +65,7 @@ namespace Spectral {
         std::string m_CurrentScenePath; // path that points to current scene
     
     private:
+        void DrawTitlebar();
         void DrawToolbar();
     
         void OnGizmoRender();

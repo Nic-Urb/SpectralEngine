@@ -10,6 +10,8 @@
 
 #include "StatisticsPanel.hpp"
 
+#include "materialdesign-main/IconsMaterialDesign.h"
+
 #include "imgui.h"
 #include "raylib.h"
 #include "OpenGL/gl.h"
@@ -22,7 +24,7 @@ namespace Spectral {
     
     void StatisticsPanel::OnImGuiRender()
     {
-        ImGui::Begin("Engine Stats");
+        ImGui::Begin(ICON_MD_BAR_CHART "Engine Stats");
         
         if (ImGui::BeginTabBar("##Stats"))
         {

@@ -29,7 +29,7 @@ namespace Spectral {
         void DrawProperties();
         
         template <typename T, typename F>
-        void DrawComponent(const std::string& name, F&& lambda);
+        void DrawComponent(const std::string& name, F&& lambda, const bool removable = true);
         
         template <typename T>
         void DisplayAddComponentEntry(const std::string& entryName);

@@ -1733,12 +1733,22 @@ static void CharCallback(GLFWwindow *window, unsigned int codepoint)
 }
 
 // GLFW3 Mouse Button Callback, runs on mouse button pressed
+// Modified by Nicolas Urbanek
 static void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
     // WARNING: GLFW could only return GLFW_PRESS (1) or GLFW_RELEASE (0) for now,
     // but future releases may add more actions (i.e. GLFW_REPEAT)
     CORE.Input.Mouse.currentButtonState[button] = action;
     CORE.Input.Touch.currentTouchState[button] = action;
+    
+    // Handle window mouse dragging internally by cocoa_window
+    // NOTE: Size of collision rectangle should match the size of titlebar from EditorLayer class
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    {
+        if (CheckCollisionPointRec(GetMousePosition(), (Rectangle){0, 0, GetScreenWidth(), 23})) {
+            glfwDragWindow(platform.handle);
+        }
+    }
     
 #if defined(SUPPORT_GESTURES_SYSTEM) && defined(SUPPORT_MOUSE_GESTURES)
     // Process mouse events as touches to be able to use mouse-gestures

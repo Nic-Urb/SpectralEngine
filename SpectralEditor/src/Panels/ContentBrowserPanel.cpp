@@ -7,6 +7,8 @@
 
 #include "ContentBrowserPanel.hpp"
 
+#include "materialdesign-main/IconsMaterialDesign.h"
+
 #include "imgui.h"
 #include "raylib.h"
 
@@ -27,13 +29,13 @@ void ContentBrowserPanel::OnImGuiRender()
 
     if (m_CurrentDir != std::filesystem::path("assets"))
     {
-        if (ImGui::Button("<-")) {
+        if (ImGui::Button(ICON_MD_REPLY)) {
             m_CurrentDir = m_CurrentDir.parent_path();
         }
     }
     
     float padding = 14.0f;
-    float thumbnailSize = 111.0f;
+    float thumbnailSize = 85.0f;
     float cellSize = thumbnailSize + padding;
 
     float panelWidth = ImGui::GetContentRegionAvail().x;

@@ -433,7 +433,8 @@ void rlImGuiSetup(bool dark)
     rlImGuiBeginInitImGui();
 
     if (dark)
-        ImGui::StyleColorsDark();
+        //ImGui::StyleColorsDark();
+        ImGui::StyleCustomDark();
     else
         ImGui::StyleColorsLight();
 

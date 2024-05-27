@@ -489,7 +489,7 @@ void* _glfwLoadLocalVulkanLoaderCocoa(void)
 //////////////////////////////////////////////////////////////////////////
 //////                       GLFW platform API                      //////
 //////////////////////////////////////////////////////////////////////////
-
+// Modified by Nicolas Urbanek
 GLFWbool _glfwConnectCocoa(int platformID, _GLFWplatform* platform)
 {
     const _GLFWplatform cocoa =
@@ -543,6 +543,7 @@ GLFWbool _glfwConnectCocoa(int platformID, _GLFWplatform* platform)
         .hideWindow = _glfwHideWindowCocoa,
         .requestWindowAttention = _glfwRequestWindowAttentionCocoa,
         .focusWindow = _glfwFocusWindowCocoa,
+        .dragWindow = _glfwDragWindowCocoa,
         .setWindowMonitor = _glfwSetWindowMonitorCocoa,
         .windowFocused = _glfwWindowFocusedCocoa,
         .windowIconified = _glfwWindowIconifiedCocoa,

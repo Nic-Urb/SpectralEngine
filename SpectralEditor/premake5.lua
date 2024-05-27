@@ -17,6 +17,7 @@ project "SpectralEditor"
   
     includedirs { 
         "src",
+        "ressources/fonts",
         "%{wks.location}/SpectralEngine/src",
         "%{wks.location}/SpectralEngine/vendor",
         "%{IncludeDir.spdlog}",

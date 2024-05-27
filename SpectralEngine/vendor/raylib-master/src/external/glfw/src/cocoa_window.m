@@ -770,7 +770,7 @@ static const NSRange kEmptyRange = { NSNotFound, 0 };
 
 
 // Create the Cocoa window
-//
+// Modified by Nicolas Urbanek
 static GLFWbool createNativeWindow(_GLFWwindow* window,
                                    const _GLFWwndconfig* wndconfig,
                                    const _GLFWfbconfig* fbconfig)
@@ -812,8 +812,9 @@ static GLFWbool createNativeWindow(_GLFWwindow* window,
 
     NSUInteger styleMask = NSWindowStyleMaskMiniaturizable;
 
-    if (window->monitor || !window->decorated)
-        styleMask |= NSWindowStyleMaskBorderless;
+    if (window->monitor || !window->decorated) {
+        styleMask |= NSWindowStyleMaskTitled | NSWindowStyleMaskResizable | NSWindowStyleMaskClosable | NSWindowStyleMaskFullSizeContentView;
+    }
     else
     {
         styleMask |= (NSWindowStyleMaskTitled | NSWindowStyleMaskClosable);
@@ -866,6 +867,11 @@ static GLFWbool createNativeWindow(_GLFWwindow* window,
 
         if (wndconfig->maximized)
             [window->ns.object zoom:nil];
+    }
+    
+    if (!wndconfig->decorated) {
+        [window->ns.object setTitlebarAppearsTransparent:true];
+        [window->ns.object setTitleVisibility:NSWindowTitleHidden];
     }
 
     if (strlen(wndconfig->ns.frameName))
@@ -1237,6 +1243,12 @@ void _glfwFocusWindowCocoa(_GLFWwindow* window)
     [NSApp activateIgnoringOtherApps:YES];
     [window->ns.object makeKeyAndOrderFront:nil];
     } // autoreleasepool
+}
+
+// Added by Nicolas Urbanek
+void _glfwDragWindowCocoa(_GLFWwindow* window)
+{
+    [window->ns.object performWindowDragWithEvent:[NSApp currentEvent]];
 }
 
 void _glfwSetWindowMonitorCocoa(_GLFWwindow* window,
