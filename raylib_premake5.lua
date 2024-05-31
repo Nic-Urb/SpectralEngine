@@ -32,6 +32,12 @@ function platform_defines()
     filter {"options:graphics=opengl11"}
         defines{"GRAPHICS_API_OPENGL_11"}
 
+    filter {"options:graphics=openges3"}
+        defines{"GRAPHICS_API_OPENGL_ES3"}
+
+    filter {"options:graphics=openges2"}
+        defines{"GRAPHICS_API_OPENGL_ES2"}
+
     filter {"system:macosx"}
         disablewarnings {"deprecated-declarations"}
 
@@ -54,13 +60,19 @@ function get_raylib_dir()
     return "SpectralEngine/vendor/raylib-master"
 end
 
-function link_raylib()
-    links {"raylib"}
+function link_raylib() -- + links ANGLE
+    libdirs {"../SpectralEngine/vendor/chrome-angle"}
+    links {"raylib", "libEGL.dylib", "libGLESv2.dylib"}
 
     includedirs {"../" .. raylib_dir .. "/src" }
     includedirs {"../" .. raylib_dir .."/src/external" }
     includedirs {"../" .. raylib_dir .."/src/external/glfw/include" }
     platform_defines()
+
+    postbuildcommands {
+        "{COPY} ../SpectralEngine/vendor/chrome-angle/libEGL.dylib %{cfg.targetdir}",
+        "{COPY} ../SpectralEngine/vendor/chrome-angle/libGLESv2.dylib %{cfg.targetdir}"
+    }
 
     filter "action:vs*"
         defines{"_WINSOCK_DEPRECATED_NO_WARNINGS", "_CRT_SECURE_NO_WARNINGS"}

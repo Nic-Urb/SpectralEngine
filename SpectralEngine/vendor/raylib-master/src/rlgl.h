@@ -103,6 +103,8 @@
 *     3. This notice may not be removed or altered from any source distribution.
 *
 **********************************************************************************************/
+// Use OpenGL ES 2.0 to enable ANGLE support
+#define GRAPHICS_API_OPENGL_ES2
 
 #ifndef RLGL_H
 #define RLGL_H

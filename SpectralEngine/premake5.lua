@@ -30,7 +30,6 @@ project "SpectralEngine"
     --filter "files::vendor/ImGuizmo/**.cpp"
       --  flags {"NoPCH"}
 
-    --link_raylib()
     include_raylib()
     -- if we need raylib in this library, then change to link !
 
