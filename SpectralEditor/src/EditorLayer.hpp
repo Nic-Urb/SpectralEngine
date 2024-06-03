@@ -5,7 +5,9 @@
 //  Created by Nicolas U on 04.04.24.
 //
 #include "Spectral.h"
+
 #include "Renderer/EditorCamera.hpp"
+
 #include "Panels/HierarchyPanel.hpp"
 #include "Panels/ContentBrowserPanel.hpp"
 #include "Panels/StatisticsPanel.hpp"
@@ -37,10 +39,7 @@ namespace Spectral {
         void OnImGuiRender() override;
     
     private:
-        enum class SceneState {
-            Edit = 0,
-            Play = 1
-        };
+        enum class SceneState { Edit = 0, Play = 1 };
     
     private:
         std::shared_ptr<Scene> m_ActiveScene;
@@ -59,7 +58,7 @@ namespace Spectral {
         SceneState m_CurrentState = SceneState::Edit;
         int m_CurrentGizmo = -1;
     
-        Object* m_SelectedObject = nullptr; // object selected by mouse picking
+        Entity m_SelectedEntity; // entity selected by mouse picking
         RayCollision m_CollisionInfo;
     
         std::string m_CurrentScenePath; // path that points to current scene

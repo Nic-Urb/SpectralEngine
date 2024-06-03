@@ -13,12 +13,10 @@
 #include "Core/Timestep.h"
 #include "Core/Scene.hpp"
 
+#include "Entt/Entity.hpp"
+#include "Entt/Components.hpp"
 
-#include "Objects/Object.hpp"
-#include "Objects/Component.hpp"
-
-
-#include "Renderer/TextureManager.hpp"
+#include "Renderer/AssetsManager.hpp"
 
 
 

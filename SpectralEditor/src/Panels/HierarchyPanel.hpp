@@ -15,17 +15,18 @@ namespace Spectral {
         HierarchyPanel(const std::shared_ptr<Scene>& context);
         
         void OnImGuiRender();
+
+        Entity GetSelectedEntity() const { return m_SelectedEntity; }
+        void SetSelectedEntity(Entity ent) { m_SelectedEntity = ent; }
         
-        Object* GetSelectedObject() { return m_SelectedContext; }
-        void SetSelectedObject(Object* object) { m_SelectedContext = object; }
         void SetContext(const std::shared_ptr<Scene>& context);
         
     private:
         std::shared_ptr<Scene> m_Context;
-        Object* m_SelectedContext = nullptr;
+        Entity m_SelectedEntity;
         
     private:
-        void DrawObjectNode(Object* object);
+        void DrawEntityNode(Entity entity);
         void DrawProperties();
         
         template <typename T, typename F>
@@ -43,5 +44,5 @@ namespace Spectral {
 // unused
 struct NodeGroup
 {
-    std::vector<Spectral::Object*> m_GroupObjects;
+    std::vector<Spectral::Entity> m_GroupEntity;
 };

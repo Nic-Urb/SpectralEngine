@@ -20,6 +20,7 @@ project "Sandbox"
         "%{wks.location}/SpectralEngine/src",
         "%{wks.location}/SpectralEngine/vendor",
         "%{IncludeDir.spdlog}",
+        "%{IncludeDir.entt}",
         "%{IncludeDir.imgui}"
     }
 

@@ -29,38 +29,54 @@ namespace Spectral {
         
         if (m_Context)
         {
-            // temp approach used to avoid modifying the container while iterating over it
-            std::vector<uint64_t> keys;
-            for (const auto& [k, _] : m_Context->m_ObjectRegistry)
+            for (auto entityID : m_Context->m_Registry.view<entt::entity>())
             {
-                keys.push_back(k);
-            }
-            
-            for (const auto& key : keys)
-            {
-                const auto& object = m_Context->m_ObjectRegistry[key];
-                DrawObjectNode(object.get());
+                Entity entity{ entityID, m_Context.get() };
+                DrawEntityNode(entity);
             }
             
             if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
             {
-                m_SelectedContext = nullptr;
+                m_SelectedEntity = {};
             }
             
             // Right-click on blank space
             if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))
             {
-                if (ImGui::MenuItem("Create Empty Object"))
+                if (ImGui::MenuItem("Empty Entity"))
                 {
-                    m_Context->CreateObject<Object>(UUID());
+                    m_Context->CreateEntity(UUID(), "Entity");
                 }
-                if (ImGui::MenuItem("Create Static Object"))
+                
+                if (ImGui::MenuItem("Sprite"))
                 {
-                    m_Context->CreateObject<StaticObject>(UUID());
+                    Entity entity = m_Context->CreateEntity(UUID(), "Sprite");
+                    entity.AddComponent<SpriteComponent>();
                 }
-                if (ImGui::MenuItem("Create Runtime Object"))
+                
+                if (ImGui::MenuItem("Model"))
                 {
-                    m_Context->CreateObject<RuntimeObject>(UUID());
+                    Entity entity = m_Context->CreateEntity(UUID(), "Model");
+                    entity.AddComponent<ModelComponent>();
+                }
+                
+                if (ImGui::MenuItem("Camera"))
+                {
+                    Entity entity = m_Context->CreateEntity(UUID(), "Camera");
+                    entity.AddComponent<CameraComponent>();
+                }
+                
+                if (ImGui::MenuItem("Actor"))
+                {
+                    m_Context->CreateEntity(UUID(), "Actor");
+                    // @TODO: Add ScriptComponent
+                    // @TODO: Add Physics
+                }
+                
+                if (ImGui::MenuItem("Light"))
+                {
+                    m_Context->CreateEntity(UUID(), "Light");
+                    // @TODO: Add LightComponent
                 }
                 
                 ImGui::EndPopup();
@@ -70,7 +86,7 @@ namespace Spectral {
         
         
         ImGui::Begin(ICON_MD_EDIT_NOTE "Properties");
-        if (m_SelectedContext != nullptr) {
+        if (m_SelectedEntity) {
             DrawProperties();
         }
         ImGui::End();
@@ -79,24 +95,24 @@ namespace Spectral {
     void HierarchyPanel::SetContext(const std::shared_ptr<Scene>& context) 
     {
         m_Context = context;
-        m_SelectedContext = nullptr;
+        m_SelectedEntity = {};
     }
 
-    void HierarchyPanel::DrawObjectNode(Object* object)
+    void HierarchyPanel::DrawEntityNode(Entity entity)
     {
-        ImGuiTreeNodeFlags flags = ((m_SelectedContext == object) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+        ImGuiTreeNodeFlags flags = ((m_SelectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
         flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-        bool opened = ImGui::TreeNodeEx((void*)object, flags, object->GetName().c_str());
+        bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, entity.GetName().c_str());
         
         if (ImGui::IsItemClicked())
         {
-            m_SelectedContext = object;
+            m_SelectedEntity = entity;
         }
         
         bool removeNode = false;
-        if (ImGui::BeginPopupContextItem())
+        if (ImGui::BeginPopupContextItem(0))
         {
-            if (ImGui::MenuItem("Delete Entity")) {
+            if (ImGui::MenuItem("Delete ", entity.GetName().c_str())) {
                 removeNode = true;
             }
             ImGui::EndPopup();
@@ -105,7 +121,7 @@ namespace Spectral {
         if (opened)
         {
             ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-            bool opened = ImGui::TreeNodeEx((void*)9817239, flags, object->GetName().c_str()); // (void*)9817239 some random id just for testing
+            bool opened = ImGui::TreeNodeEx((void*)9817239, flags, entity.GetName().c_str()); // (void*)9817239 some random id just for testing
             if (opened)
             {
                 ImGui::TreePop();
@@ -116,17 +132,11 @@ namespace Spectral {
         
         if (removeNode)
         {
-            if (m_SelectedContext == object) {
-                m_SelectedContext = nullptr;
+            m_Context->RemoveEntity(entity);
+            
+            if (m_SelectedEntity == entity) {
+                m_SelectedEntity = {};
             }
-            
-            SP_LOG_INFO("Trying to delete, here is uuid {0}", object->GetUUID());
-            
-            if (!m_Context->RemoveObject(object->GetUUID()))
-            {
-                // print some error
-            }
-            
             removeNode = false;
         }
         
@@ -137,14 +147,14 @@ namespace Spectral {
         ImGui::Text(ICON_MD_VIEW_IN_AR);
         ImGui::SameLine();
         
-        const std::string& name = m_SelectedContext->GetName();
+        const std::string& name = m_SelectedEntity.GetName();
         char buffer[128];
         strncpy(buffer, name.c_str(), sizeof(buffer));
         ImGui::SameLine();
         ImGui::PushItemWidth(145.0f);
         if (ImGui::InputText("##Name", buffer, sizeof(buffer)))
         {
-            m_SelectedContext->SetName(buffer);
+            m_SelectedEntity.SetName(buffer);
         }
         ImGui::PopItemWidth();
         
@@ -164,7 +174,7 @@ namespace Spectral {
             DisplayAddComponentEntry<CameraComponent>("Camera");
             DisplayAddComponentEntry<TransformComponent>("Transform");
             DisplayAddComponentEntry<SpriteComponent>("Sprite");
-            DisplayAddComponentEntry<AnimationComponent>("Animation");
+            DisplayAddComponentEntry<ModelComponent>("Model");
             
             ImGui::EndPopup();
         }
@@ -173,7 +183,7 @@ namespace Spectral {
             ImGui::Checkbox("IsActive?", &component.Active);
             ImGui::Checkbox("Debug?", &component.Debug);
             
-            auto camera = component.Camera;
+            std::shared_ptr<RuntimeCamera> camera = component.Camera;
             
             bool isPerspective = (camera->GetCamera3D().projection == CAMERA_PERSPECTIVE) ? true : false;
             
@@ -199,15 +209,13 @@ namespace Spectral {
             ImGui::SliderFloat("##FOVSlider", &camera->GetCamera3D().fovy, 1.0f, 180.0f, "%.1f");
         });
         
-        
         DrawComponent<TransformComponent>("Transform", /*calling anonymous function*/ [](auto& component) {
-            DrawVector3Control("Translation", component.Transform.Translation);
-            DrawVector3Control("Rotation", component.Transform.Rotation);
-            DrawVector3Control("Scale", component.Transform.Scale);
+            DrawVector3Control("Translation", component.Translation);
+            DrawVector3Control("Rotation", component.Rotation);
+            DrawVector3Control("Scale", component.Scale);
         }, false);
         
-        
-        DrawComponent<SpriteComponent>("Sprite", /*calling anonymous function*/ [](auto& component) {            
+        DrawComponent<SpriteComponent>("Sprite", /*calling anonymous function*/ [](auto& component) {
             ImGui::Button("Load Texture", ImVec2(100.0f, 0.0f));
             
             if (ImGui::BeginDragDropTarget()) {
@@ -216,7 +224,7 @@ namespace Spectral {
                 {
                     const char* path = (const char*)payload->Data;
                     std::filesystem::path texturePath(path); // @TODO: We actually don't need this step - there is a implicit from const char* to std::string
-                    component.SpriteTexture = *TextureManager::LoadTexture(texturePath.string()).get();
+                    component.SpriteTexture = *AssetsManager::LoadTexture(texturePath.string()).get();
                 }
                 
                 ImGui::EndDragDropTarget();
@@ -225,11 +233,21 @@ namespace Spectral {
             ImGui::ColorEdit4("Tint Color", (float*)&component.Tint, ImGuiColorEditFlags_NoInputs);
         });
         
-        
-        DrawComponent<AnimationComponent>("Animation", /*calling anonymous function*/ [](auto& component) {
+        DrawComponent<ModelComponent>("Model", /*calling anonymous function*/ [](auto& component) {
+            ImGui::Button("Load Model", ImVec2(100.0f, 0.0f));
             
+            if (ImGui::BeginDragDropTarget()) {
+                
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("3D_PAYLOAD"))
+                {
+                    const char* path = (const char*)payload->Data;
+                    std::filesystem::path modelPath(path); // @TODO: We actually don't need this step - there is a implicit from const char* to std::string
+                    component.ModelData = *AssetsManager::LoadModel(modelPath.string()).get();
+                }
+                
+                ImGui::EndDragDropTarget();
+            }
         });
-        
         
     }
 
@@ -238,11 +256,11 @@ namespace Spectral {
     {
         const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
         
-        if (m_SelectedContext)
+        if (m_SelectedEntity)
         {
-            if (m_SelectedContext->HasComponent(T::GetComponentId()))
+            if (m_SelectedEntity.HasComponent<T>())
             {
-                auto& component = *m_SelectedContext->GetComponent<T>();
+                auto& component = m_SelectedEntity.GetComponent<T>();
                 
                 bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
                 
@@ -276,7 +294,7 @@ namespace Spectral {
                 
                 if (removeComponent)
                 {
-                    m_SelectedContext->RemoveComponent(T::GetComponentId());
+                    m_SelectedEntity.RemoveComponent<T>();
                 }
                                 
             }
@@ -286,13 +304,13 @@ namespace Spectral {
     template <typename T>
     void HierarchyPanel::DisplayAddComponentEntry(const std::string& entryName) 
     {
-        if (m_SelectedContext)
+        if (m_SelectedEntity)
         {
-            if (!m_SelectedContext->HasComponent(T::GetComponentId()))
+            if (!m_SelectedEntity.HasComponent<T>())
             {
                 if (ImGui::MenuItem(entryName.c_str()))
                 {
-                    m_SelectedContext->AddComponent<T>();
+                    m_SelectedEntity.AddComponent<T>();
                     ImGui::CloseCurrentPopup();
                 }
             }
@@ -312,7 +330,6 @@ namespace Spectral {
         
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f });
-        //ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
             ImGui::Button("X");
         ImGui::PopStyleColor(2);
             ImGui::SameLine();
@@ -322,7 +339,6 @@ namespace Spectral {
         
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.8f, 0.15f, 1.0f });
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f });
-        //ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4{ 0.1f, 0.8f, 0.1f, 1.0f });
             ImGui::Button("Y");
         ImGui::PopStyleColor(2);
             ImGui::SameLine();
@@ -332,7 +348,6 @@ namespace Spectral {
         
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.15f, 0.8f, 1.0f });
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f });
-        //ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4{ 0.1f, 0.15f, 0.8f, 1.0f });
             ImGui::Button("Z");
         ImGui::PopStyleColor(2);
             ImGui::SameLine();

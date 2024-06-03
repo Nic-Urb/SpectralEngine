@@ -23,6 +23,7 @@ project "SpectralEngine"
         "src",
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.imgui}",
+        "%{IncludeDir.entt}",
         "%{IncludeDir.yaml_cpp}",
         "%{IncludeDir.imguizmo}"
     }

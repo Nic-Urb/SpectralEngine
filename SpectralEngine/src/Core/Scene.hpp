@@ -8,15 +8,15 @@
 
 #include "pch.h"
 
-#include "Objects/Object.hpp"
 #include "Core/UUID.hpp"
 #include "Renderer/EditorCamera.hpp"
 #include "Renderer/RuntimeCamera.hpp"
 
+#include "entt.hpp"
 
 namespace Spectral {
 
-    //class Object; // fwd declaration
+    class Entity; // fwd declaration
 
     class Scene
     {
@@ -24,40 +24,31 @@ namespace Spectral {
         Scene(const std::string& name) : m_Name(name) {}
         ~Scene() {}
         
-        template <typename T>
-        T* CreateObject(UUID uuid)
-        {
-            // ensure on compile-time that we only try to add a class derives from Object
-            static_assert(std::is_base_of_v<Object, T>, "T must derive from Object");
-            
-            std::unique_ptr<T> object = std::make_unique<T>(uuid);
-            object->OnConstruct();
-            m_ObjectRegistry.emplace(uuid, std::move(object));
-            
-            return static_cast<T*>(m_ObjectRegistry[uuid].get());
-        }
+        Entity CreateEntity(UUID uuid, const std::string& name);
+        void RemoveEntity(Entity entity);
         
-        bool RemoveObject(UUID uuid);
-        
-        // OnRuntimeStart(...) @TODO: Implement this
+        void OnRuntimeStart(); // @TODO: Call this
+        void OnRuntimeEnd(); // @TODO: Call this
         // OnRuntimePause() @TODO: Implement this
-        // OnRuntimeEnd() @TODO: Implement this
         
         void OnUpdateRuntime(Timestep ts);
         void OnRenderRuntime();
         
         void OnUpdateEditor(Timestep ts);
-        void OnRenderEditor(EditorCamera& camera, const RayCollision& collisionInfo); // this update should be called from client layer update function
+        void OnRenderEditor(EditorCamera& camera); // this update should be called from client layer update function
         
-        const size_t GetObjectCount() const { return m_ObjectRegistry.size(); }
+        const size_t GetEntityCount() const { return m_EntityMap.size(); }
         const std::string& GetName() { return m_Name; }
         
     private:
-        std::unordered_map<UUID, std::unique_ptr<Object>> m_ObjectRegistry;
+        entt::registry m_Registry;
+        
+        std::unordered_map<UUID, entt::entity> m_EntityMap;
         std::shared_ptr<RuntimeCamera> m_RuntimeCamera;
         std::string m_Name;
         
         // allow access to private members
+        friend class Entity;
         friend class SceneSerializer;
         friend class HierarchyPanel;
         friend class EditorLayer;

@@ -30,8 +30,8 @@ namespace Spectral {
         {
             if (ImGui::BeginTabItem("General"))
             {
-                ImGui::Text("Loaded Textures: %zu", TextureManager::GetLoadedTextureCount());
-                ImGui::Text("Loaded Objects: %zu", m_Context->GetObjectCount());
+                ImGui::Text("Loaded Assets: %zu", AssetsManager::GetLoadedAssetsCount());
+                ImGui::Text("Loaded Entities: %zu", m_Context->GetEntityCount());
                 
                 ImGui::Separator();
                 
@@ -58,9 +58,10 @@ namespace Spectral {
             
             if (ImGui::BeginTabItem("Debug"))
             {                
+                // @TODO: Temp
                 ImGui::Text("Mouse Hit Info: ");
                 ImGui::Spacing();
-                ImGui::Text("Hit Object: %s", m_CollisionName.c_str());
+                ImGui::Text("Hit Enitity: %s", m_CollisionName.c_str());
                 ImGui::Text("Ray Cast Distance: %f", m_CollisionInfo.distance);
                 ImGui::Text("Hit Pos: %.2f %.2f %.2f",
                             m_CollisionInfo.point.x,

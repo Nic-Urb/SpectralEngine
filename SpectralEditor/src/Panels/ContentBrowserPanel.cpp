@@ -15,12 +15,12 @@
 ContentBrowserPanel::ContentBrowserPanel() 
     : m_CurrentDir("assets")
 {
-    Spectral::TextureManager::LoadTexture("ressources/contentBrowser/directory.png");
-    Spectral::TextureManager::LoadTexture("ressources/contentBrowser/file.png");
-    Spectral::TextureManager::LoadTexture("ressources/contentBrowser/filespectral.png");
-    Spectral::TextureManager::LoadTexture("ressources/contentBrowser/filelua.png");
-    Spectral::TextureManager::LoadTexture("ressources/contentBrowser/filepng.png");
-    Spectral::TextureManager::LoadTexture("ressources/contentBrowser/file3d.png");
+    Spectral::AssetsManager::LoadTexture("ressources/contentBrowser/directory.png");
+    Spectral::AssetsManager::LoadTexture("ressources/contentBrowser/file.png");
+    Spectral::AssetsManager::LoadTexture("ressources/contentBrowser/filespectral.png");
+    Spectral::AssetsManager::LoadTexture("ressources/contentBrowser/filelua.png");
+    Spectral::AssetsManager::LoadTexture("ressources/contentBrowser/filepng.png");
+    Spectral::AssetsManager::LoadTexture("ressources/contentBrowser/file3d.png");
 }
 
 void ContentBrowserPanel::OnImGuiRender()
@@ -62,23 +62,23 @@ void ContentBrowserPanel::OnImGuiRender()
             Texture* iconTexture = nullptr;
             if (std::filesystem::is_directory(entry))
             {
-                iconTexture = Spectral::TextureManager::GetTexture("ressources/contentBrowser/directory.png").get();
+                iconTexture = Spectral::AssetsManager::GetTexture("ressources/contentBrowser/directory.png").get();
             } else {
                 if (path.extension() == ".spectral") {
-                    iconTexture = Spectral::TextureManager::GetTexture("ressources/contentBrowser/filespectral.png").get();
+                    iconTexture = Spectral::AssetsManager::GetTexture("ressources/contentBrowser/filespectral.png").get();
                 }
                 else if (path.extension() == ".png") {
-                    iconTexture = Spectral::TextureManager::GetTexture("ressources/contentBrowser/filepng.png").get();
+                    iconTexture = Spectral::AssetsManager::GetTexture("ressources/contentBrowser/filepng.png").get();
                 }
-                else if (path.extension() == ".fbx" || path.extension() == ".obj") {
-                    iconTexture = Spectral::TextureManager::GetTexture("ressources/contentBrowser/file3d.png").get();
+                else if (path.extension() == ".glb" || path.extension() == ".obj" || path.extension() == ".m3d") {
+                    iconTexture = Spectral::AssetsManager::GetTexture("ressources/contentBrowser/file3d.png").get();
                 }
                 else if (path.extension() == ".lua") {
-                    iconTexture = Spectral::TextureManager::GetTexture("ressources/contentBrowser/filelua.png").get();
+                    iconTexture = Spectral::AssetsManager::GetTexture("ressources/contentBrowser/filelua.png").get();
                 }
                 else {
                     // for no supported extension just use a default file icon
-                    iconTexture = Spectral::TextureManager::GetTexture("ressources/contentBrowser/file.png").get();
+                    iconTexture = Spectral::AssetsManager::GetTexture("ressources/contentBrowser/file.png").get();
                 }
             }
                 
@@ -100,7 +100,7 @@ void ContentBrowserPanel::OnImGuiRender()
                 else if (path.extension() == ".png") {
                     dragType = "TEXTURE_PAYLOAD";
                 }
-                else if (path.extension() == ".fbx" || path.extension() == ".obj") {
+                else if (path.extension() == ".glb" || path.extension() == ".obj" || path.extension() == ".m3d") {
                     dragType = "3D_PAYLOAD";
                 }
                 else if (path.extension() == ".lua") {

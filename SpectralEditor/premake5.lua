@@ -22,6 +22,7 @@ project "SpectralEditor"
         "%{wks.location}/SpectralEngine/vendor",
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.imgui}",
+        "%{IncludeDir.entt}",
         "%{IncludeDir.yaml_cpp}",
         "%{IncludeDir.imguizmo}",
         "%{IncludeDir.tinyfiledialogs}"

@@ -10,6 +10,7 @@
 #include "materialdesign-main/IconsMaterialDesign.h"
 
 #include "Core/SceneSerializer.hpp"
+
 #include "Panels/StatisticsPanel.hpp"
 
 #include "rlImGui.h"
@@ -26,8 +27,8 @@ namespace Spectral {
     EditorLayer::EditorLayer()
     {
         // @TODO: Init all stuff OnAttach()
-        TextureManager::LoadTexture("ressources/Play.png");
-        TextureManager::LoadTexture("ressources/Stop.png");
+        AssetsManager::LoadTexture("ressources/Play.png");
+        AssetsManager::LoadTexture("ressources/Stop.png");
         
         m_ActiveScene = std::make_shared<Scene>("TestScene");
         
@@ -97,7 +98,7 @@ namespace Spectral {
             ClearBackground(BLACK); // swap buffers
             if (m_CurrentState == SceneState::Edit)
             {
-                m_ActiveScene->OnRenderEditor(m_EditorCamera, m_CollisionInfo);
+                m_ActiveScene->OnRenderEditor(m_EditorCamera);
             } else {
                 m_ActiveScene->OnRenderRuntime();
             }
@@ -276,14 +277,10 @@ namespace Spectral {
 
     void EditorLayer::OnGizmoUpdate()
     {
-        Object* selectedObject = m_HierarchyPanel.GetSelectedObject();
-        if (selectedObject && m_CurrentGizmo != -1)
+        Entity selectedEntity = m_HierarchyPanel.GetSelectedEntity();
+        if (selectedEntity && m_CurrentGizmo != -1)
         {
-            TransformComponent* tc = selectedObject->GetComponent<TransformComponent>();
-            
-            if (!tc) {
-                return;
-            }
+            auto& tc = selectedEntity.GetComponent<TransformComponent>();
             
             ImGuizmo::SetOrthographic(false);
             ImGuizmo::SetDrawlist();
@@ -298,7 +295,7 @@ namespace Spectral {
             
             // recompose matrix
             float transformMatrix[4 * 4];
-            ImGuizmo::RecomposeMatrixFromComponents(Vector3ToFloat(tc->Transform.Translation), Vector3ToFloat(tc->Transform.Rotation), Vector3ToFloat(tc->Transform.Scale), transformMatrix);
+            ImGuizmo::RecomposeMatrixFromComponents(Vector3ToFloat(tc.Translation), Vector3ToFloat(tc.Rotation), Vector3ToFloat(tc.Scale), transformMatrix);
         
             // snapping
             bool snap = IsKeyDown(KEY_LEFT_CONTROL);
@@ -318,9 +315,9 @@ namespace Spectral {
                 
                 ImGuizmo::DecomposeMatrixToComponents(transformMatrix, translation, rotation, scale);
                 
-                tc->Transform.Translation = {translation[0], translation[1], translation[2]};
-                tc->Transform.Rotation = {rotation[0], rotation[1], rotation[2]};
-                tc->Transform.Scale = {scale[0], scale[1], scale[2]};
+                tc.Translation = {translation[0], translation[1], translation[2]};
+                tc.Rotation = {rotation[0], rotation[1], rotation[2]};
+                tc.Scale = {scale[0], scale[1], scale[2]};
             }
         }
     }
@@ -338,42 +335,60 @@ namespace Spectral {
             collision.hit = false;
             collision.distance = FLT_MAX;
             
-            for (const auto& [_, v] : m_ActiveScene->m_ObjectRegistry)
+            // handle sprite
             {
-                // handle sprite
-                if (v->HasComponent(SpriteComponent::GetComponentId()))
+                auto view = m_ActiveScene->m_Registry.view<SpriteComponent>();
+                for (auto entity : view)
                 {
-                    SpriteComponent& sc = *v->GetComponent<SpriteComponent>();
-                    
-                    RayCollision spriteCollision = { 0 };
-                    spriteCollision.hit = false;
-                    
-                    spriteCollision = GetRayCollisionQuad(mouseRay, sc.Bounds[0], sc.Bounds[1], sc.Bounds[2], sc.Bounds[3]);
-                    
+                    Entity entt = { entity, m_ActiveScene.get() };
+           
+                    auto& sprite = entt.GetComponent<SpriteComponent>();
+                        
+                    RayCollision spriteCollision = GetRayCollisionQuad(mouseRay, sprite.Bounds[0], sprite.Bounds[1], sprite.Bounds[2], sprite.Bounds[3]);
+                        
                     if (spriteCollision.hit && spriteCollision.distance < collision.distance) {
                         collision = spriteCollision;
-                        m_SelectedObject = &sc.GetOwner();
+                        m_SelectedEntity = entt;
                     }
                 }
-                // handle model
             }
+            
+            
+            // handle model
+            /*{
+                auto view = m_ActiveScene->m_Registry.view<ModelComponent>();
+                for (auto entity : view)
+                {
+                    Entity entt = { entity, m_ActiveScene.get() };
+           
+                    auto& model = entt.GetComponent<ModelComponent>();
+                        
+                    RayCollision modelCollision; //= GetRayCollisionMesh(mouseRay, Mesh mesh, Matrix transform);
+                        
+                    if (modelCollision.hit && modelCollision.distance < collision.distance) {
+                        collision = modelCollision;
+                        m_SelectedEntity = entt;
+                    }
+                }
+            }*/
+            
             
             // Update the collision info with the closest hit
             if (collision.hit) {
                 m_CollisionInfo = collision;
             } else {
                 m_CollisionInfo = { 0 };
-                m_SelectedObject = nullptr;  // Ensure m_SelectedObject is nullptr if no hit
+                m_SelectedEntity = {};  // Ensure if no hit
             }
             
-            if (m_SelectedObject){
-                m_HierarchyPanel.SetSelectedObject(m_SelectedObject);
+            if (m_SelectedEntity){
+                m_HierarchyPanel.SetSelectedEntity(m_SelectedEntity);
             } else {
-                m_HierarchyPanel.SetSelectedObject(nullptr);
+                m_HierarchyPanel.SetSelectedEntity({});
             }
             
             // Send collision info to stats panel
-            m_StatsPanel.SetCollisionInfo(m_CollisionInfo, m_SelectedObject ? m_SelectedObject->GetName() : "");
+            m_StatsPanel.SetCollisionInfo(m_CollisionInfo, m_SelectedEntity ? m_SelectedEntity.GetName() : "");
         }
     }
     

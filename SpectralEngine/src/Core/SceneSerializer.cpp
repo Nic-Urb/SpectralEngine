@@ -9,8 +9,9 @@
 
 #include "yaml-cpp/yaml.h"
 
-#include "Objects/Component.hpp"
-#include "Renderer/TextureManager.hpp"
+#include "Entt/Entity.hpp"
+#include "Entt/Components.hpp"
+#include "Renderer/AssetsManager.hpp"
 #include "Core/UUID.hpp"
 
 #include <fstream>
@@ -112,45 +113,56 @@ namespace Spectral {
         return out;
     }
 
-    static void SerializeObject(YAML::Emitter& out, Object* obj)
+    static void SerializeEntity(YAML::Emitter& out, Entity entt)
     {
         out << YAML::BeginMap; // Object
         
-        out << YAML::Key << "Type" << YAML::Value << obj->GetClassName();
-        out << YAML::Key << "ID" << YAML::Value << obj->GetUUID();
-        out << YAML::Key << "Name" << YAML::Value << obj->GetName();
+        out << YAML::Key << "ID" << YAML::Value << entt.GetUUID();
+        out << YAML::Key << "Name" << YAML::Value << entt.GetName();
         
-        if (obj->HasComponent(TransformComponent::GetComponentId()))
+        if (entt.HasComponent<TransformComponent>())
         {
             out << YAML::Key << "TransformComponent";
             out << YAML::BeginMap; // TransformComponent
             
-            TransformComponent& tc = *obj->GetComponent<TransformComponent>();
-            out << YAML::Key << "Translation" << YAML::Value << tc.Transform.Translation;
-            out << YAML::Key << "Rotation" << YAML::Value << tc.Transform.Rotation;
-            out << YAML::Key << "Scale" << YAML::Value << tc.Transform.Scale;
+            auto& tc = entt.GetComponent<TransformComponent>();
+            out << YAML::Key << "Translation" << YAML::Value << tc.Translation;
+            out << YAML::Key << "Rotation" << YAML::Value << tc.Rotation;
+            out << YAML::Key << "Scale" << YAML::Value << tc.Scale;
             
             out << YAML::EndMap; // TransformComponent
         }
         
-        if (obj->HasComponent(SpriteComponent::GetComponentId()))
+        if (entt.HasComponent<SpriteComponent>())
         {
             out << YAML::Key << "SpriteComponent";
             out << YAML::BeginMap; // SpriteComponent
             
-            SpriteComponent& sc = *obj->GetComponent<SpriteComponent>();
-            out << YAML::Key << "Texture" << YAML::Value << TextureManager::GetTexturePath(sc.SpriteTexture);
+            auto& sc = entt.GetComponent<SpriteComponent>();
+            out << YAML::Key << "Texture" << YAML::Value << AssetsManager::GetTexturePath(sc.SpriteTexture);
             out << YAML::Key << "Tint" << YAML::Value << sc.Tint;
             
             out << YAML::EndMap; // SpriteComponent
         }
         
-        if (obj->HasComponent(CameraComponent::GetComponentId()))
+        if (entt.HasComponent<ModelComponent>())
+        {
+            out << YAML::Key << "ModelComponent";
+            out << YAML::BeginMap; // ModelComponent
+            
+            auto& mc = entt.GetComponent<ModelComponent>();
+            out << YAML::Key << "Model" << YAML::Value << AssetsManager::GetModelPath(mc.ModelData);
+            // @TODO: Serialize/Deserialize all data for model
+            
+            out << YAML::EndMap; // ModelComponent
+        }
+        
+        if (entt.HasComponent<CameraComponent>())
         {
             out << YAML::Key << "CameraComponent";
             out << YAML::BeginMap; // CameraComponent
             
-            CameraComponent& cc = *obj->GetComponent<CameraComponent>();
+            auto& cc = entt.GetComponent<CameraComponent>();
             out << YAML::Key << "Active" << YAML::Value << cc.Active;
             out << YAML::Key << "Projection" << YAML::Value << cc.Camera->GetCamera3D().projection;
             out << YAML::Key << "FOV" << YAML::Value << cc.Camera->GetCamera3D().fovy;
@@ -172,14 +184,17 @@ namespace Spectral {
         YAML::Emitter out;
         out << YAML::BeginMap;
         out << YAML::Key << "Scene" << YAML::Value << m_Scene->m_Name;
-        out << YAML::Key << "Objects" << YAML::Value << YAML::BeginSeq;
+        out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
         
-        for (const auto& [_, v] : m_Scene->m_ObjectRegistry)
+        for(auto entityID : m_Scene->m_Registry.view<entt::entity>())
         {
-            if (!v) {
-                continue;
+            Entity entity = { entityID, m_Scene.get() };
+            
+            if (!entity) {
+                return;
             }
-            SerializeObject(out, v.get());
+            
+            SerializeEntity(out, entity);
         }
         
         out << YAML::EndSeq;
@@ -205,59 +220,52 @@ namespace Spectral {
             return false;
         }
         
-        auto objects = data["Objects"];
-        if (objects)
+        auto entities = data["Entities"];
+        if (entities)
         {
-            for (auto object : objects)
+            for (auto entity : entities)
             {
-                Object* obj = nullptr;
+                uint64_t uuid = entity["ID"].as<Spectral::UUID>();
+                const std::string& name = entity["Name"].as<std::string>();
                 
-                uint64_t uuid = object["ID"].as<Spectral::UUID>();
-                
-                auto type = object["Type"];
-                if (type) {
-                    const std::string& objectType = type.as<std::string>();
-                    if (objectType == "Object") {
-                        obj = m_Scene->CreateObject<Object>(uuid);
-                    } else if (objectType == "StaticObject") {
-                        obj = m_Scene->CreateObject<StaticObject>(uuid);
-                    } else if (objectType == "RuntimeObject") {
-                        obj = m_Scene->CreateObject<RuntimeObject>(uuid);
-                    }
-                }
-            
-                if (!obj) {
-                    // print some error
-                    SP_LOG_ERORR("SceneSerializer::Deserialize() - Object is NULL, invalid Type");
-                    return false;
-                }
-                
-                const std::string& name = object["Name"].as<std::string>();
-                obj->SetName(name);
+                auto entt = m_Scene->CreateEntity(uuid, name);
                 
                 SP_LOG_INFO("Deserializing object : {0}, {1}", uuid, name);
                 
-                auto transformComponent = object["TransformComponent"];
+                auto transformComponent = entity["TransformComponent"];
                 if (transformComponent)
                 {
-                    TransformComponent& tc = *obj->GetOrAddComponent<TransformComponent>();
-                    tc.Transform.Translation = transformComponent["Translation"].as<Vector3>();
-                    tc.Transform.Rotation = transformComponent["Rotation"].as<Vector3>();
-                    tc.Transform.Scale = transformComponent["Scale"].as<Vector3>();
+                    auto& tc = entt.GetOrAddComponent<TransformComponent>();
+                    tc.Translation = transformComponent["Translation"].as<Vector3>();
+                    tc.Rotation = transformComponent["Rotation"].as<Vector3>();
+                    tc.Scale = transformComponent["Scale"].as<Vector3>();
                 }
                 
-                auto spriteComponent = object["SpriteComponent"];
+                auto spriteComponent = entity["SpriteComponent"];
                 if (spriteComponent)
                 {
-                    SpriteComponent& sc = *obj->GetOrAddComponent<SpriteComponent>();
-                    sc.SpriteTexture = *TextureManager::LoadTexture(spriteComponent["Texture"].as<std::string>()).get();
-                    sc.Tint = spriteComponent["Tint"].as<Vector4>();
+                    auto& sc = entt.GetOrAddComponent<SpriteComponent>();
+                    auto texturePath = spriteComponent["Texture"].as<std::string>();
+                    if (!texturePath.empty()) {
+                        sc.SpriteTexture = *AssetsManager::LoadTexture(texturePath).get();
+                        sc.Tint = spriteComponent["Tint"].as<Vector4>();
+                    }
                 }
                 
-                auto cameraComponent = object["CameraComponent"];
-                if (cameraComponent) 
+                auto modelComponent = entity["ModelComponent"];
+                if (modelComponent)
                 {
-                    CameraComponent& cc = *obj->GetOrAddComponent<CameraComponent>();
+                    auto& mc = entt.GetOrAddComponent<ModelComponent>();
+                    auto modelPath = modelComponent["Model"].as<std::string>();
+                    if (!modelPath.empty()) {
+                        mc.ModelData = *AssetsManager::LoadModel(modelPath).get();
+                    }
+                }
+                
+                auto cameraComponent = entity["CameraComponent"];
+                if (cameraComponent)
+                {
+                    auto& cc = entt.GetOrAddComponent<CameraComponent>();
                     cc.Active = cameraComponent["Active"].as<bool>();
                     cc.Camera->GetCamera3D().projection = cameraComponent["Projection"].as<int>();
                     cc.Camera->GetCamera3D().fovy = cameraComponent["FOV"].as<float>();
