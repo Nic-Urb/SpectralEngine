@@ -9,8 +9,12 @@
 #include "pch.h"
 
 #include "raylib.h"
+#include "rlgl.h"
+#include "sol.hpp"
+
 #include "Core/UUID.hpp"
 #include "Renderer/RuntimeCamera.hpp"
+
 
 namespace Spectral {
 
@@ -19,7 +23,8 @@ namespace Spectral {
         UUID ID;
         std::string Name;
         
-        IDComponent(UUID uuid, const std::string& name);
+        IDComponent(UUID uuid, const std::string& name)
+                : ID(uuid), Name(name) {}
     };
     
     struct TransformComponent
@@ -28,14 +33,22 @@ namespace Spectral {
         Vector3 Rotation    = {0.0f, 0.0f, 0.0f};
         Vector3 Scale       = {1.0f, 1.0f, 1.0f};
         
-        void PushMatrix();
-        void PopMatrix();
+        void PushMatrix()
+        {
+            rlPushMatrix();
+            rlTranslatef(Translation.x, Translation.y, Translation.z);
+            rlRotatef(Rotation.x, 1, 0, 0);
+            rlRotatef(Rotation.y, 0, 1, 0);
+            rlRotatef(Rotation.z, 0, 0, 1);
+            rlScalef(Scale.x, Scale.y, Scale.z);
+        }
+        void PopMatrix() { rlPopMatrix(); }        
     };
 
     struct SpriteComponent
     {
         Texture2D SpriteTexture;
-        Vector4   Tint;
+        Vector4   Tint = {1.0f, 1.0f, 1.0f, 1.0f};
         Vector3   Bounds[4];
     };
 
@@ -61,12 +74,15 @@ namespace Spectral {
         bool Active = false;
         bool Debug =  false;
         
-        CameraComponent();
+        CameraComponent() {  Camera = std::make_shared<RuntimeCamera>(); }
     };
 
+    struct LuaScriptComponent
+    {
+        sol::table self;
+        std::string ScriptPath;
+    };
+    
     struct AnimationComponent
-    {};
-
-    struct NativeScriptComponent
     {};
 }

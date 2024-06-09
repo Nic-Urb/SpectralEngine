@@ -21,6 +21,8 @@ project "SpectralEngine"
   
     includedirs { 
         "src",
+        "%{IncludeDir.lua}",
+        "%{IncludeDir.sol}",
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.imgui}",
         "%{IncludeDir.entt}",
@@ -44,12 +46,14 @@ project "SpectralEngine"
         -- not search for header files enclosed in angle brackets in the User Header Search Paths
         xcodebuildsettings = { ["ALWAYS_SEARCH_USER_PATHS"] = "YES" }
         externalincludedirs {
-            "%{IncludeDir.spdlog}"
+            "%{IncludeDir.spdlog}",
+            "%{IncludeDir.sol}"
         }
 
     filter {}
 
     links {
+        "lua",
         "imgui",
         "yaml-cpp"
     }

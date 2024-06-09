@@ -46,7 +46,7 @@ namespace Spectral {
                 
                 ImGui::Separator();
                 
-                // @TODO: Get version from other libs: FMOD, Box2D, PhysX...
+                // @TODO: Get version from other libs: FMOD, Box2D, PhysX, LUA
                 ImGui::Text("Libs compiled versions: ");
                 ImGui::Spacing();
                 ImGui::Text("ImGui: %s", ImGui::GetVersion());

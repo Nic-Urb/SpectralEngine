@@ -71,6 +71,8 @@ check_angle()
 
 IncludeDir = {}
 
+IncludeDir["lua"] = "%{wks.location}/SpectralEngine/vendor/lua/src"
+IncludeDir["sol"] = "%{wks.location}/SpectralEngine/vendor/lua/sol2/include"
 IncludeDir["spdlog"] = "%{wks.location}/SpectralEngine/vendor/spdlog/include"
 IncludeDir["imgui"] = "%{wks.location}/SpectralEngine/vendor/imgui-master"
 IncludeDir["entt"] = "%{wks.location}/SpectralEngine/vendor/entt"
@@ -82,6 +84,7 @@ group "Dependencies"
     include ("raylib_premake5.lua")
     include ("SpectralEngine/vendor/imgui-master")
     include ("SpectralEngine/vendor/yaml-cpp")
+    include ("SpectralEngine/vendor/lua")
 
 group "Core"
     include ("SpectralEngine")

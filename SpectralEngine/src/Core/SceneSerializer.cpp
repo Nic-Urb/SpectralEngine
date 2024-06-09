@@ -170,6 +170,17 @@ namespace Spectral {
             out << YAML::EndMap; // CameraComponent
         }
         
+        if (entt.HasComponent<LuaScriptComponent>())
+        {
+            out << YAML::Key << "LuaScriptComponent";
+            out << YAML::BeginMap; // LuaScriptComponent
+            
+            auto& lsc = entt.GetComponent<LuaScriptComponent>();
+            out << YAML::Key << "Path" << YAML::Value << lsc.ScriptPath;
+            
+            out << YAML::EndMap; // LuaScriptComponent
+        }
+        
         out << YAML::EndMap; // Object
     }
 
@@ -269,6 +280,13 @@ namespace Spectral {
                     cc.Active = cameraComponent["Active"].as<bool>();
                     cc.Camera->GetCamera3D().projection = cameraComponent["Projection"].as<int>();
                     cc.Camera->GetCamera3D().fovy = cameraComponent["FOV"].as<float>();
+                }
+                
+                auto luaScriptComponent = entity["LuaScriptComponent"];
+                if (luaScriptComponent)
+                {
+                    auto& lsc = entt.GetOrAddComponent<LuaScriptComponent>();
+                    lsc.ScriptPath = luaScriptComponent["Path"].as<std::string>();
                 }
                 
             }

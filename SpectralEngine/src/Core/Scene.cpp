@@ -11,6 +11,8 @@
 
 #include "Renderer/Renderer.hpp"
 
+#include "Scripting/ScriptingEngine.hpp"
+
 #include "raylib.h"
 #include "raymath.h"
 
@@ -33,27 +35,54 @@ namespace Spectral {
     }
 
     void Scene::OnRuntimeStart()
-    {}
+    {
+        // lua scripts
+        auto view = m_Registry.view<LuaScriptComponent>();
+        for (auto handle : view)
+        {
+            Entity entt = {handle, this};
+            
+            ScriptingEngine::OnCreate(entt);
+        }
+    }
 
     void Scene::OnRuntimeEnd()
-    {}
+    {
+        // @TODO: script on destroy
+        /*m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc) {
+         //ScriptingEngine::OnDestroy(entity);
+        });
+        */
+    }
 
     void Scene::OnUpdateRuntime(Timestep ts)
     {
         // update scripts
-        
-        
-        // camera
-        auto view = m_Registry.view<CameraComponent>();
-        for (auto entity : view)
         {
-            Entity entt = { entity, this };
-            auto& camera = entt.GetComponent<CameraComponent>();
+            // lua scripts
+            auto view = m_Registry.view<LuaScriptComponent>();
+            for (auto handle : view)
+            {
+                Entity entt = {handle, this};
+                ScriptingEngine::OnUpdate(entt, ts);
+            }
             
-            if (camera.Active) {
-                m_RuntimeCamera = camera.Camera;
-            } else {
-                m_RuntimeCamera = nullptr;
+            // @TODO: native scripts
+        }
+        
+        // update camera
+        {
+            auto view = m_Registry.view<CameraComponent>();
+            for (auto handle : view)
+            {
+                Entity entt = { handle, this };
+                auto& camera = entt.GetComponent<CameraComponent>();
+                
+                if (camera.Active) {
+                    m_RuntimeCamera = camera.Camera;
+                } else {
+                    m_RuntimeCamera = nullptr;
+                }
             }
         }
     }
@@ -67,9 +96,9 @@ namespace Spectral {
                 // draw sprites
                 {
                     auto view = m_Registry.view<TransformComponent, SpriteComponent>();
-                    for (auto entity : view)
+                    for (auto handle : view)
                     {
-                        auto [transform, sprite] = view.get<TransformComponent, SpriteComponent>(entity);
+                        auto [transform, sprite] = view.get<TransformComponent, SpriteComponent>(handle);
                         
                         transform.PushMatrix();
                         
@@ -82,9 +111,9 @@ namespace Spectral {
                 // draw 3D models
                 {
                     auto view = m_Registry.view<TransformComponent, ModelComponent>();
-                    for (auto entity : view)
+                    for (auto handle : view)
                     {
-                        auto [transform, model] = view.get<TransformComponent, ModelComponent>(entity);
+                        auto [transform, model] = view.get<TransformComponent, ModelComponent>(handle);
                         
                         transform.PushMatrix();
                         
@@ -102,10 +131,10 @@ namespace Spectral {
 {
         // @TODO: Temp solution to get bounds for sprites
         auto view = m_Registry.view<SpriteComponent, TransformComponent>();
-        for (auto entity : view)
+        for (auto handle : view)
         {
             // Update sprites bounds
-            auto [transform, sprite] = view.get<TransformComponent, SpriteComponent>(entity);
+            auto [transform, sprite] = view.get<TransformComponent, SpriteComponent>(handle);
             
             Vector3 position;
             Vector2 size;
@@ -152,9 +181,9 @@ namespace Spectral {
             // draw sprites
             {
                 auto view = m_Registry.view<TransformComponent, SpriteComponent>();
-                for (auto entity : view)
+                for (auto handle : view)
                 {
-                    auto [transform, sprite] = view.get<TransformComponent, SpriteComponent>(entity);
+                    auto [transform, sprite] = view.get<TransformComponent, SpriteComponent>(handle);
                     
                     transform.PushMatrix();
                     
@@ -173,9 +202,9 @@ namespace Spectral {
             // draw 3D models
             {
                 auto view = m_Registry.view<TransformComponent, ModelComponent>();
-                for (auto entity : view)
+                for (auto handle : view)
                 {
-                    auto [transform, model] = view.get<TransformComponent, ModelComponent>(entity);
+                    auto [transform, model] = view.get<TransformComponent, ModelComponent>(handle);
                     
                     transform.PushMatrix();
                     
@@ -189,9 +218,9 @@ namespace Spectral {
             // draw camera debug
             {
                 auto view = m_Registry.view<CameraComponent>();
-                for (auto entity : view)
+                for (auto handle : view)
                 {
-                    Entity entt = {entity, this};
+                    Entity entt = {handle, this};
                     auto& cameraComponent = entt.GetComponent<CameraComponent>();
                     
                     if (cameraComponent.Debug) {

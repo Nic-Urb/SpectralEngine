@@ -392,20 +392,20 @@ namespace Spectral {
         }
     }
     
-    void EditorLayer::OnRuntimeStart() // @TODO: Implement
+    void EditorLayer::OnRuntimeStart()
     {
         m_CurrentState = SceneState::Play;
         
         // m_ActiveScene = new Scene();
-        // m_ActiveScene->OnRuntimeStart();
+        m_ActiveScene->OnRuntimeStart();
     }
     
-    void EditorLayer::OnRuntimeStop() // @TODO: Implement
+    void EditorLayer::OnRuntimeStop()
     {
         m_CurrentState = SceneState::Edit;
         
         // m_ActiveScene = EditorScene;
-        // m_ActiveScene->OnRuntimeStop();
+        m_ActiveScene->OnRuntimeEnd();
     }
     
     void EditorLayer::OpenFile()

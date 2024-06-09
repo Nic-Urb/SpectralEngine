@@ -20,7 +20,9 @@ project "SpectralEditor"
         "ressources/fonts",
         "%{wks.location}/SpectralEngine/src",
         "%{wks.location}/SpectralEngine/vendor",
-        "%{IncludeDir.spdlog}",
+        "%{IncludeDir.lua}",
+        "%{IncludeDir.sol}", -- remove ? (included in external)
+        "%{IncludeDir.spdlog}", -- remove ? 
         "%{IncludeDir.imgui}",
         "%{IncludeDir.entt}",
         "%{IncludeDir.yaml_cpp}",
@@ -38,7 +40,8 @@ project "SpectralEditor"
         -- not search for header files enclosed in angle brackets in the User Header Search Paths
         xcodebuildsettings = { ["ALWAYS_SEARCH_USER_PATHS"] = "YES" }
         externalincludedirs {
-            "%{IncludeDir.spdlog}"
+            "%{IncludeDir.spdlog}",
+            "%{IncludeDir.sol}"
         }
 
     filter {}

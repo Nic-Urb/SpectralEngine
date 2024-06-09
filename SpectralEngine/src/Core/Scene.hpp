@@ -22,7 +22,7 @@ namespace Spectral {
     {
     public:
         Scene(const std::string& name) : m_Name(name) {}
-        ~Scene() {}
+        ~Scene() = default;
         
         Entity CreateEntity(UUID uuid, const std::string& name);
         void RemoveEntity(Entity entity);

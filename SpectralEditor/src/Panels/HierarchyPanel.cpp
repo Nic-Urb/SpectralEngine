@@ -68,7 +68,9 @@ namespace Spectral {
                 
                 if (ImGui::MenuItem("Actor"))
                 {
-                    m_Context->CreateEntity(UUID(), "Actor");
+                    Entity entity = m_Context->CreateEntity(UUID(), "Actor");
+                    // @TODO: Temp
+                    //entity.AddComponent<NativeScriptComponent>().Bind<PlayerController>();
                     // @TODO: Add ScriptComponent
                     // @TODO: Add Physics
                 }
@@ -148,7 +150,7 @@ namespace Spectral {
         ImGui::SameLine();
         
         const std::string& name = m_SelectedEntity.GetName();
-        char buffer[128];
+        char buffer[64];
         strncpy(buffer, name.c_str(), sizeof(buffer));
         ImGui::SameLine();
         ImGui::PushItemWidth(145.0f);
@@ -175,6 +177,7 @@ namespace Spectral {
             DisplayAddComponentEntry<TransformComponent>("Transform");
             DisplayAddComponentEntry<SpriteComponent>("Sprite");
             DisplayAddComponentEntry<ModelComponent>("Model");
+            DisplayAddComponentEntry<LuaScriptComponent>("Lua Script");
             
             ImGui::EndPopup();
         }
@@ -236,13 +239,36 @@ namespace Spectral {
         DrawComponent<ModelComponent>("Model", /*calling anonymous function*/ [](auto& component) {
             ImGui::Button("Load Model", ImVec2(100.0f, 0.0f));
             
-            if (ImGui::BeginDragDropTarget()) {
-                
+            if (ImGui::BeginDragDropTarget()) 
+            {
                 if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("3D_PAYLOAD"))
                 {
                     const char* path = (const char*)payload->Data;
                     std::filesystem::path modelPath(path); // @TODO: We actually don't need this step - there is a implicit from const char* to std::string
                     component.ModelData = *AssetsManager::LoadModel(modelPath.string()).get();
+                }
+                
+                ImGui::EndDragDropTarget();
+            }
+        });
+        
+        DrawComponent<LuaScriptComponent>("LuaScript", /*calling anonymous function*/ [](auto& component) {
+            
+            char buffer[64];
+            strncpy(buffer, component.ScriptPath.c_str(), sizeof(buffer));
+            
+            if (ImGui::InputTextWithHint("Script", "Drag or type file", buffer, sizeof(buffer)))
+            {
+                component.ScriptPath = buffer;
+            }
+            
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCRIPT_PAYLOAD"))
+                {
+                    const char* path = (const char*)payload->Data;
+                    std::filesystem::path scriptPath(path);  // @TODO: We actually don't need this step - there is a implicit from const char* to std::string
+                    component.ScriptPath = scriptPath;
                 }
                 
                 ImGui::EndDragDropTarget();

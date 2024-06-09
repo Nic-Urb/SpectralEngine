@@ -19,6 +19,8 @@ project "Sandbox"
         "src",
         "%{wks.location}/SpectralEngine/src",
         "%{wks.location}/SpectralEngine/vendor",
+        "%{IncludeDir.lua}",
+        "%{IncludeDir.sol}",
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.entt}",
         "%{IncludeDir.imgui}"
@@ -34,7 +36,8 @@ project "Sandbox"
         -- not search for header files enclosed in angle brackets in the User Header Search Paths
         xcodebuildsettings = { ["ALWAYS_SEARCH_USER_PATHS"] = "YES" }
         externalincludedirs {
-            "%{IncludeDir.spdlog}"
+            "%{IncludeDir.spdlog}",
+            "%{IncludeDir.sol}"
         }
 
     filter {}

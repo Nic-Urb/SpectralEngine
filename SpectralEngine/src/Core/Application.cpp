@@ -13,6 +13,8 @@
 #include "ImGuizmo.h"
 #include "raylib.h"
 
+#include "Scripting/ScriptingEngine.hpp"
+
 
 namespace Spectral {
 
@@ -25,13 +27,12 @@ namespace Spectral {
         
         // m_ImGuiLayer = new ImGuiLayer();
         // PushOverlay(m_ImGuiLayer);
-        // ScriptEngine::Init();
+        ScriptingEngine::Init();
     }
 
     Application::~Application()
     {
         SP_LOG_INFO("Engine::Shutdown");
-        //ScriptEngine::Shutdown();
     }
 
     void Application::Run()

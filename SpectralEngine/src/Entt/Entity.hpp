@@ -10,9 +10,10 @@
 
 #include "entt.hpp"
 
-#include "Entt/Components.hpp"
 #include "Core/Scene.hpp"
 #include "Core/Assert.hpp"
+
+#include "Components.hpp"
 
 namespace Spectral {
 
