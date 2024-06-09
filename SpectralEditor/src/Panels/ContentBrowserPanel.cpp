@@ -133,8 +133,7 @@ void ContentBrowserPanel::OnImGuiRender()
             ImGui::NextColumn();
             ImGui::PopID();
         }
-        ImGui::Columns(1);
-        ImGui::End();
     }
-    
+    ImGui::Columns(1);
+    ImGui::End();
 }
