@@ -15,7 +15,7 @@
 
 namespace Spectral {
     
-    void Renderer::RenderTexturedPlane(const Texture &texture, const Vector4 &tint)
+    void Renderer::RenderTexturedPlane(const Texture &texture, const Matrix &transform, const Vector4 &tint)
     {
         Color color;
         color.r = tint.x * 255.0f;
@@ -23,11 +23,18 @@ namespace Spectral {
         color.b = tint.z * 255.0f;
         color.a = tint.w * 255.0f;
         
-        DrawTexturedPlane(texture, (Vector3){0.0f, 2.0f, 0.0f}, (Vector2){(float)texture.width, (float)texture.height}, color);
+        Vector2 size = (Vector2){50.0f, 50.0f};
+        
+        if (texture.id > 0) {
+            DrawTexturedPlane(texture, transform, size, color);
+        } else {
+            DrawPlaneM(transform, size, color);
+        }
     }
 
     void Renderer::RenderCameraDebugLines(std::shared_ptr<RuntimeCamera> camera, Color color)
     {
+        // @TODO: Get position from a camera.position, camera.targtet, camera.up * transform matrix 
         Math::Frustum frustum;
         Math::ExtractFrustrum(camera->GetCameraProjectionMatrix(GetRenderWidth()/GetRenderHeight()), camera->GetCameraViewMatrix(), &frustum);
                 

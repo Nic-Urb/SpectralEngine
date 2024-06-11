@@ -1006,6 +1006,50 @@ void BeginMode3D(Camera camera)
     rlEnableDepthTest();            // Enable DEPTH_TEST for 3D
 }
 
+// Initializes 3D mode with custom camera (3D) (uses transfom matrix)
+// Added by Nicolas Urbanek
+void BeginMode3DM(Camera camera, Matrix transform)
+{
+    rlDrawRenderBatchActive();      // Update and draw internal render batch
+
+    rlMatrixMode(RL_PROJECTION);    // Switch to projection matrix
+    rlPushMatrix();                 // Save previous matrix, which contains the settings for the 2d ortho projection
+    rlLoadIdentity();               // Reset current matrix (projection)
+
+    float aspect = (float)CORE.Window.currentFbo.width/(float)CORE.Window.currentFbo.height;
+
+    // NOTE: zNear and zFar values are important when computing depth buffer values
+    if (camera.projection == CAMERA_PERSPECTIVE)
+    {
+        // Setup perspective projection
+        double top = RL_CULL_DISTANCE_NEAR*tan(camera.fovy*0.5*DEG2RAD);
+        double right = top*aspect;
+
+        rlFrustum(-right, right, -top, top, RL_CULL_DISTANCE_NEAR, RL_CULL_DISTANCE_FAR);
+    }
+    else if (camera.projection == CAMERA_ORTHOGRAPHIC)
+    {
+        // Setup orthographic projection
+        double top = camera.fovy/2.0;
+        double right = top*aspect;
+
+        rlOrtho(-right, right, -top,top, RL_CULL_DISTANCE_NEAR, RL_CULL_DISTANCE_FAR);
+    }
+
+    rlMatrixMode(RL_MODELVIEW);     // Switch back to modelview matrix
+    rlLoadIdentity();               // Reset current matrix (modelview)
+
+    // Setup Camera view
+    Matrix matView = MatrixLookAt(camera.position, camera.target, camera.up);
+    
+    // Combine the view matrix with the transform matrix
+    Matrix combinedMatrix = MatrixMultiply(matView, transform);
+    
+    rlMultMatrixf(MatrixToFloat(combinedMatrix));      // Multiply modelview matrix by view matrix (camera)
+
+    rlEnableDepthTest();            // Enable DEPTH_TEST for 3D
+}
+
 // Ends 3D mode and returns to default 2D orthographic mode
 void EndMode3D(void)
 {

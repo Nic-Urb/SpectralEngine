@@ -178,6 +178,8 @@ namespace Spectral {
             DisplayAddComponentEntry<SpriteComponent>("Sprite");
             DisplayAddComponentEntry<ModelComponent>("Model");
             DisplayAddComponentEntry<LuaScriptComponent>("Lua Script");
+            DisplayAddComponentEntry<RigidBody2DComponent>("Rigidbody 2D");
+            DisplayAddComponentEntry<BoxCollider2DComponent>("Box Collider 2D");
             
             ImGui::EndPopup();
         }
@@ -214,7 +216,9 @@ namespace Spectral {
         
         DrawComponent<TransformComponent>("Transform", /*calling anonymous function*/ [](auto& component) {
             DrawVector3Control("Translation", component.Translation);
-            DrawVector3Control("Rotation", component.Rotation);
+            Vector3 rotation = Vector3Scale(component.Rotation, RAD2DEG); // use rotation in degree instead of radians
+            DrawVector3Control("Rotation", rotation);
+            component.Rotation = Vector3Scale(rotation, DEG2RAD); // convert back to radians
             DrawVector3Control("Scale", component.Scale);
         }, false);
         
@@ -274,6 +278,45 @@ namespace Spectral {
                 ImGui::EndDragDropTarget();
             }
         });
+        
+        
+        DrawComponent<RigidBody2DComponent>("Rigidbody 2D", /*calling anonymous function*/ [](auto& component) {
+            
+            const char* bodyTypeStrings[] = { "Static", "Kinematic", "Dynamic"};
+            const char* currentBodyTypeString = bodyTypeStrings[(int)component.Type];
+            if (ImGui::BeginCombo("Body Type", currentBodyTypeString))
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    bool isSelected = currentBodyTypeString == bodyTypeStrings[i];
+                    if (ImGui::Selectable(bodyTypeStrings[i], isSelected))
+                    {
+                        currentBodyTypeString = bodyTypeStrings[i];
+                        component.Type = (RigidBody2DComponent::BodyType)i;
+                    }
+
+                    if (isSelected)
+                        ImGui::SetItemDefaultFocus();
+                }
+
+                ImGui::EndCombo();
+            }
+
+            ImGui::Checkbox("Fixed Rotation", &component.FixedRotation);
+            ImGui::Checkbox("Allow Sleep", &component.AllowSleep);
+            ImGui::Checkbox("Awake", &component.Awake);
+            
+            ImGui::DragFloat("Gravity Scale", &component.GravityScale, 0.01f, 0.0f);
+        });
+        
+        DrawComponent<BoxCollider2DComponent>("Box Collider 2D", /*calling anonymous function*/ [](auto& component) {
+            
+                //ImGui::DragFloat2("Size", ); // @TODO: Expose size and offset
+                ImGui::DragFloat("Density", &component.Density, 0.01f, 0.0f, 1.0f);
+                ImGui::DragFloat("Friction", &component.Friction, 0.01f, 0.0f, 1.0f);
+                ImGui::DragFloat("Restitution", &component.Restitution, 0.01f, 0.0f, 1.0f);
+        });
+        
         
     }
 

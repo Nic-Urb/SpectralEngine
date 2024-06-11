@@ -29,6 +29,13 @@ function Player.OnUpdate(self, ts)
 		transform.translation.x = transform.translation.x + speed * ts
 	end
 
+	if self.owner:has(RigidBody2D) then
+		local rigid = self.owner:get(RigidBody2D)
+		if rigid.isAwake then
+			rigid:applyImpulse(vector2(500.0, 0.0), vector2(0.0, 0.0), true)
+		end
+	end
+
 end
 
 return Player

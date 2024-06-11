@@ -44,10 +44,33 @@ function Player.OnCreate(self)
 ```
 
 **For now we only support on component:**
-- TransformComponent (`Transform`)
+- TransformComponent as `Transform`
+- RigidBody2DComponent as `RigidBody2D`
 
 But you can easily add more by including them in the `ScriptGlue` class.
 
+### Physics 2D
+
+You can access the rigid body by getting it from an entity's components using `owner.self:get(RigidBody2D)`
+
+**exposed variables:**
+ - `isAwake`
+ - `gravityScale`
+
+**exposed functions:**
+- `applyImpulse(impulse, point, wake)`
+
+``` lua
+-- example
+function Player.OnUpdate(self, ts)
+    if self.owner:has(RigidBody2D) then
+		local rigid = self.owner:get(RigidBody2D)
+		if rigid.isAwake then
+			rigid:applyImpulse(vector2(500.0, 0.0), vector2(0.0, 0.0), true)
+		end
+	end
+end
+```
 
 ### Input
 

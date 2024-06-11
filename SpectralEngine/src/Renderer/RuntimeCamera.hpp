@@ -18,7 +18,12 @@ namespace Spectral {
         
         void OnUpdate(Timestep ts) override;
         
+        const Matrix& GetTransform() { return m_StoredTransform; }
+        void SetTransform(const Matrix& transform) { m_StoredTransform = transform; }
+        
     private:
+        // @TODO: temp solution
+        Matrix m_StoredTransform;
         
         // ...
     };

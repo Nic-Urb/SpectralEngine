@@ -409,6 +409,100 @@ void DrawCubeWiresV(Vector3 position, Vector3 size, Color color)
     DrawCubeWires(position, size.x, size.y, size.z, color);
 }
 
+// Draw cube wires (uses matrix transform)
+// Added by Nicolas Urbanek
+void DrawCubeWiresM(Matrix transform, Vector3 size, Color color)
+{
+    rlPushMatrix();
+        rlMultMatrixf(MatrixToFloatV(transform).v); // apply the transformation matrix
+    
+        rlScalef(size.x, size.y, size.z);
+    
+        rlBegin(RL_LINES);
+            rlColor4ub(color.r, color.g, color.b, color.a);
+
+                // Front face
+                rlVertex3f(-0.5f, -0.5f,  0.5f);  // Bottom left
+                rlVertex3f( 0.5f, -0.5f,  0.5f);  // Bottom right
+    
+                rlVertex3f( 0.5f, -0.5f,  0.5f);  // Bottom right
+                rlVertex3f( 0.5f,  0.5f,  0.5f);  // Top right
+    
+                rlVertex3f( 0.5f,  0.5f,  0.5f);  // Top right
+                rlVertex3f(-0.5f,  0.5f,  0.5f);  // Top left
+    
+                rlVertex3f(-0.5f,  0.5f,  0.5f);  // Top left
+                rlVertex3f(-0.5f, -0.5f,  0.5f);  // Bottom left
+
+                // Back face
+                rlVertex3f(-0.5f, -0.5f, -0.5f);  // Bottom left
+                rlVertex3f( 0.5f, -0.5f, -0.5f);  // Bottom right
+    
+                rlVertex3f( 0.5f, -0.5f, -0.5f);  // Bottom right
+                rlVertex3f( 0.5f,  0.5f, -0.5f);  // Top right
+    
+                rlVertex3f( 0.5f,  0.5f, -0.5f);  // Top right
+                rlVertex3f(-0.5f,  0.5f, -0.5f);  // Top left
+    
+                rlVertex3f(-0.5f,  0.5f, -0.5f);  // Top left
+                rlVertex3f(-0.5f, -0.5f, -0.5f);  // Bottom left
+
+                // Left face
+                rlVertex3f(-0.5f, -0.5f,  0.5f);  // Bottom front
+                rlVertex3f(-0.5f, -0.5f, -0.5f);  // Bottom back
+    
+                rlVertex3f(-0.5f, -0.5f, -0.5f);  // Bottom back
+                rlVertex3f(-0.5f,  0.5f, -0.5f);  // Top back
+    
+                rlVertex3f(-0.5f,  0.5f, -0.5f);  // Top back
+                rlVertex3f(-0.5f,  0.5f,  0.5f);  // Top front
+    
+                rlVertex3f(-0.5f,  0.5f,  0.5f);  // Top front
+                rlVertex3f(-0.5f, -0.5f,  0.5f);  // Bottom front
+
+                // Right face
+                rlVertex3f( 0.5f, -0.5f,  0.5f);  // Bottom front
+                rlVertex3f( 0.5f, -0.5f, -0.5f);  // Bottom back
+    
+                rlVertex3f( 0.5f, -0.5f, -0.5f);  // Bottom back
+                rlVertex3f( 0.5f,  0.5f, -0.5f);  // Top back
+    
+                rlVertex3f( 0.5f,  0.5f, -0.5f);  // Top back
+                rlVertex3f( 0.5f,  0.5f,  0.5f);  // Top front
+    
+                rlVertex3f( 0.5f,  0.5f,  0.5f);  // Top front
+                rlVertex3f( 0.5f, -0.5f,  0.5f);  // Bottom front
+
+                // Top face
+                rlVertex3f(-0.5f,  0.5f,  0.5f);  // Top left front
+                rlVertex3f( 0.5f,  0.5f,  0.5f);  // Top right front
+    
+                rlVertex3f( 0.5f,  0.5f,  0.5f);  // Top right front
+                rlVertex3f( 0.5f,  0.5f, -0.5f);  // Top right back
+    
+                rlVertex3f( 0.5f,  0.5f, -0.5f);  // Top right back
+                rlVertex3f(-0.5f,  0.5f, -0.5f);  // Top left back
+    
+                rlVertex3f(-0.5f,  0.5f, -0.5f);  // Top left back
+                rlVertex3f(-0.5f,  0.5f,  0.5f);  // Top left front
+
+                // Bottom face
+                rlVertex3f(-0.5f, -0.5f,  0.5f);  // Bottom left front
+                rlVertex3f( 0.5f, -0.5f,  0.5f);  // Bottom right front
+    
+                rlVertex3f( 0.5f, -0.5f,  0.5f);  // Bottom right front
+                rlVertex3f( 0.5f, -0.5f, -0.5f);  // Bottom right back
+    
+                rlVertex3f( 0.5f, -0.5f, -0.5f);  // Bottom right back
+                rlVertex3f(-0.5f, -0.5f, -0.5f);  // Bottom left back
+    
+                rlVertex3f(-0.5f, -0.5f, -0.5f);  // Bottom left back
+                rlVertex3f(-0.5f, -0.5f,  0.5f);  // Bottom left front
+
+        rlEnd();
+    rlPopMatrix();
+}
+
 // Draw sphere
 void DrawSphere(Vector3 centerPos, float radius, Color color)
 {
@@ -982,26 +1076,49 @@ void DrawPlane(Vector3 centerPos, Vector2 size, Color color)
     rlPopMatrix();
 }
 
+// Draw a plane (uses transform matrix)
+// Added by Nicolas Urbanek
+void DrawPlaneM(Matrix transform, Vector2 size, Color color)
+{
+    // NOTE: Plane is always created on XY-axis
+    rlPushMatrix();
+        rlMultMatrixf(MatrixToFloat(transform)); // apply the transformation matrix
+    
+        rlScalef(size.x, size.y, 1.0f);
+
+        rlBegin(RL_QUADS);
+            rlColor4ub(color.r, color.g, color.b, color.a);
+            rlNormal3f(0.0f, 0.0f, 1.0f);                       // Normal pointing +z
+
+            rlVertex3f(-0.5f, -0.5f, 0.0f);
+            rlVertex3f(0.5f, -0.5f, 0.0f);
+            rlVertex3f(0.5f, 0.5f, 0.0f);
+            rlVertex3f(-0.5f, 0.5f, 0.0f);
+        rlEnd();
+    rlPopMatrix();
+}
+
 // Draw a textured plane
 // Added by Nicolas Urbanek
-void DrawTexturedPlane(Texture2D texture, Vector3 position, Vector2 size, Color tint)
+void DrawTexturedPlane(Texture2D texture, Matrix transform, Vector2 size, Color tint)
 {
     rlCheckRenderBatchLimit(4);
     rlSetTexture(texture.id);
     
-    // NOTE: The plane is always created on the XZ ground (same as DrawPlane())
+    // NOTE: The plane is always created on the XY-axis (same as DrawPlane())
     rlPushMatrix();
-        rlTranslatef(position.x, position.y, position.z);
-        rlScalef(size.x, 1.0f, size.y);
+        rlMultMatrixf(MatrixToFloat(transform)); // apply the transformation matrix
+    
+        rlScalef(size.x, size.y, 1.0f);
     
         rlBegin(RL_QUADS);
             rlColor4ub(tint.r, tint.g, tint.b, tint.a);
-            rlNormal3f(0.0f, 1.0f, 0.0f);                                   // Normal pointing up
+            rlNormal3f(0.0f, 0.0f, 1.0f);                                   // Normal pointing +z
     
-            rlTexCoord2f(0.0f, 0.0f); rlVertex3f(-0.5f, 0.0f, -0.5f);       // Bottom left of the texture and quad
-            rlTexCoord2f(0.0f, 1.0f); rlVertex3f(-0.5f, 0.0f, 0.5f);        // Top left of the texture and quad
-            rlTexCoord2f(1.0f, 1.0f); rlVertex3f(0.5f, 0.0f, 0.5f);         // Top right of the texture and quad
-            rlTexCoord2f(1.0f, 0.0f); rlVertex3f(0.5f, 0.0f, -0.5f);        // Bottom right of the texture and quad
+            rlTexCoord2f(0.0f, 1.0f); rlVertex3f(-0.5f, -0.5f, 0.0f);
+            rlTexCoord2f(1.0f, 1.0f); rlVertex3f(0.5f, -0.5f, 0.0f);
+            rlTexCoord2f(1.0f, 0.0f); rlVertex3f(0.5f, 0.5f, 0.0f);
+            rlTexCoord2f(0.0f, 0.0f); rlVertex3f(-0.5f, 0.5f, 0.0f);
             
         rlEnd();
     rlPopMatrix();

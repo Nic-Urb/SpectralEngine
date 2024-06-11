@@ -1019,6 +1019,7 @@ RLAPI void EndDrawing(void);                                      // End canvas 
 RLAPI void BeginMode2D(Camera2D camera);                          // Begin 2D mode with custom camera (2D)
 RLAPI void EndMode2D(void);                                       // Ends 2D mode with custom camera
 RLAPI void BeginMode3D(Camera3D camera);                          // Begin 3D mode with custom camera (3D)
+RLAPI void BeginMode3DM(Camera3D camera, Matrix transform);       // Added by Nicolas Urbanek
 RLAPI void EndMode3D(void);                                       // Ends 3D mode and returns to default 2D orthographic mode
 RLAPI void BeginTextureMode(RenderTexture2D target);              // Begin drawing to render texture
 RLAPI void EndTextureMode(void);                                  // Ends drawing to render texture
@@ -1503,6 +1504,7 @@ RLAPI void DrawCube(Vector3 position, float width, float height, float length, C
 RLAPI void DrawCubeV(Vector3 position, Vector3 size, Color color);                                       // Draw cube (Vector version)
 RLAPI void DrawCubeWires(Vector3 position, float width, float height, float length, Color color);        // Draw cube wires
 RLAPI void DrawCubeWiresV(Vector3 position, Vector3 size, Color color);                                  // Draw cube wires (Vector version)
+RLAPI void DrawCubeWiresM(Matrix transform, Vector3 size, Color color);                                                // Added by Nicolas Urbanek
 RLAPI void DrawSphere(Vector3 centerPos, float radius, Color color);                                     // Draw sphere
 RLAPI void DrawSphereEx(Vector3 centerPos, float radius, int rings, int slices, Color color);            // Draw sphere with extended parameters
 RLAPI void DrawSphereWires(Vector3 centerPos, float radius, int rings, int slices, Color color);         // Draw sphere wires
@@ -1513,7 +1515,8 @@ RLAPI void DrawCylinderWiresEx(Vector3 startPos, Vector3 endPos, float startRadi
 RLAPI void DrawCapsule(Vector3 startPos, Vector3 endPos, float radius, int slices, int rings, Color color); // Draw a capsule with the center of its sphere caps at startPos and endPos
 RLAPI void DrawCapsuleWires(Vector3 startPos, Vector3 endPos, float radius, int slices, int rings, Color color); // Draw capsule wireframe with the center of its sphere caps at startPos and endPos
 RLAPI void DrawPlane(Vector3 centerPos, Vector2 size, Color color);                                      // Draw a plane XZ
-RLAPI void DrawTexturedPlane(Texture2D texture, Vector3 position, Vector2 size, Color tint);             // Added by Nicolas Urbanek
+RLAPI void DrawPlaneM(Matrix transform, Vector2 size, Color color);                                      // Added by Nicolas Urbanek
+RLAPI void DrawTexturedPlane(Texture2D texture, Matrix transform, Vector2 size, Color tint);             // Added by Nicolas Urbanek
 RLAPI void DrawRay(Ray ray, Color color);                                                                // Draw a ray line
 RLAPI void DrawGrid(int slices, float spacing);                                                          // Draw a grid (centered at (0, 0, 0))
 

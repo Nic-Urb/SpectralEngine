@@ -4,10 +4,6 @@
 //
 //  Created by Nicolas U on 23.03.24.
 //
-
-#ifndef pch_pch
-#define pch_pch
-
 //@TODO: PCH IS TURNED OFF FOR NOW !!!!
 
 // Include any system framework and library headers here that should be included in all compilation units.
@@ -27,9 +23,10 @@
 #include "ImGui/ImGuiLayer.hpp"
 
 
-
-//#include "raylib.h"
-//#include "rlImGui.h"
-
-
-#endif /* pch_pch */
+/*
+ struct ImGuiDebugAllocInfo
+ {
+     int         TotalAllocCount;            // Number of call to MemAlloc().
+     int         TotalFreeCount;
+    size_t GetMemoryAllocationSize();
+ */

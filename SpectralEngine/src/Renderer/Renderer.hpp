@@ -17,7 +17,7 @@ namespace Spectral {
     {
     public:
         
-        static void RenderTexturedPlane(const Texture& texture, const Vector4& tint);
+        static void RenderTexturedPlane(const Texture &texture, const Matrix &transform, const Vector4 &tint);
         static void RenderCameraDebugLines(std::shared_ptr<RuntimeCamera> camera, Color color);
     };
 }

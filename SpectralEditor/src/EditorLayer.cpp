@@ -120,6 +120,8 @@ namespace Spectral {
             m_StatsPanel.OnImGuiRender();
         }
         
+        //ImGui::ShowMetricsWindow(); // @TODO: flag display
+        
         // render viewport
         char buffer[128];
         std::string name = (m_CurrentState == SceneState::Edit) ? "Edit Mode" : "Play Mode";
@@ -325,6 +327,7 @@ namespace Spectral {
     void EditorLayer::MousePicking()
 {
         // @TODO: Fix mouse position
+        // @TODO: Fix sprite bounds colllision
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && m_ViewportFocused && !ImGuizmo::IsOver() && !ImGuizmo::IsUsing())
         {
             Vector2 relativeMousePosition = (Vector2){(float)GetMousePosition().x - (float)m_ViewportRect.x, (float)GetMousePosition().y - (float)m_ViewportRect.y};

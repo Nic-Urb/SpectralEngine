@@ -27,7 +27,8 @@ project "SpectralEditor"
         "%{IncludeDir.entt}",
         "%{IncludeDir.yaml_cpp}",
         "%{IncludeDir.imguizmo}",
-        "%{IncludeDir.tinyfiledialogs}"
+        "%{IncludeDir.tinyfiledialogs}",
+        "%{IncludeDir.box2d}"
     }
 
     filter "action:xcode4"
@@ -50,6 +51,4 @@ project "SpectralEditor"
 
     links {
         "SpectralEngine"
-        --"yaml-cpp"
-        --"imgui"
     }

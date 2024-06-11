@@ -8,6 +8,7 @@
 #include "ScriptGlue.hpp"
 
 #include "raylib.h"
+#include "box2d/box2d.h"
 #include "MetaHelper.hpp"
 #include "Entt/Entity.hpp"
 #include "Entt/Components.hpp"
@@ -46,12 +47,25 @@ namespace Spectral {
                 .template func<&Entity_RemoveComponent<T>>("remove"_hs)
             ;
         }
+    
+    
+        static void Physics_ApplyImpulse(RigidBody2DComponent& self, const Vector2& impulse, const Vector2& point, bool wake)
+        {
+            b2Body* body = (b2Body*)self.RuntimeBody;
+            
+            if (body->GetType() == b2_dynamicBody) {
+                    body->ApplyLinearImpulse(b2Vec2(impulse.x, impulse.y), b2Vec2(point.x, point.y), wake);
+            } else {
+                SP_LOG_WARN("Physics_ApplyImpulse: Attempting to apply impulse to a non-dynamic body");
+            }
+        }
     }
     
     void ScriptGlue::RegisterMetaFunctions()
     {
         // register all component types
         RegisterMetaComponent<TransformComponent>();
+        RegisterMetaComponent<RigidBody2DComponent>();
         // add additional components here as needed
     }
     
@@ -65,6 +79,15 @@ namespace Spectral {
                 "translation", &TransformComponent::Translation,
                 "rotation", &TransformComponent::Rotation,
                 "scale", &TransformComponent::Scale
+                );
+        
+        lua.new_usertype<RigidBody2DComponent>(
+                "RigidBody2D",
+                sol::constructors<RigidBody2DComponent()>(),
+                "type_id", &entt::type_hash<RigidBody2DComponent>::value,
+                "isAwake", &RigidBody2DComponent::Awake,
+                "gravityScale", &RigidBody2DComponent::GravityScale,
+                "applyImpulse", &Physics_ApplyImpulse
                 );
         
     }
@@ -101,16 +124,27 @@ namespace Spectral {
                                  
                 );
         
-        // math functions
+        // math
+        lua.new_usertype<Vector2>(
+            "vector2",
+            "x", &Vector2::x,
+            "y", &Vector2::y
+        );
+        
         lua.new_usertype<Vector3>(
             "vector3",
-            sol::constructors<Vector3()>(),
             "x", &Vector3::x,
             "y", &Vector3::y,
             "z", &Vector3::z
         );
         
-        // @TODO: physics functions
+        lua.set_function("vector2", [](float x, float y) {
+                return (Vector2){x, y};
+            });
+        
+        lua.set_function("vector3", [](float x, float y) {
+                return (Vector2){x, y};
+            });
         
         // input functions
         lua.set_function("inputKeyPressed", IsKeyPressed);

@@ -16,6 +16,8 @@
 #include "raylib.h"
 #include "raymath.h"
 
+#include "box2d/box2d.h"
+
 namespace Spectral {
 
     Entity Scene::CreateEntity(UUID uuid, const std::string& name)
@@ -36,18 +38,67 @@ namespace Spectral {
 
     void Scene::OnRuntimeStart()
     {
-        // lua scripts
-        auto view = m_Registry.view<LuaScriptComponent>();
-        for (auto handle : view)
+        m_PhysicsWorld = new b2World({0.0f, -15.0f} /*setting up the gravity*/);
+        
+        // physics
         {
-            Entity entt = {handle, this};
-            
-            ScriptingEngine::OnCreate(entt);
+            auto view = m_Registry.view<RigidBody2DComponent>();
+            for (auto handle : view)
+            {
+                Entity entt = {handle, this};
+                
+                auto& rb2d = entt.GetComponent<RigidBody2DComponent>();
+                auto& transform = entt.GetComponent<TransformComponent>();
+                
+                b2BodyDef bodyDef;
+                bodyDef.type = (b2BodyType)rb2d.Type;
+                bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
+                bodyDef.angle = transform.Rotation.z;
+                
+                bodyDef.fixedRotation = rb2d.FixedRotation;
+                bodyDef.allowSleep = rb2d.AllowSleep;
+                bodyDef.awake = rb2d.Awake;
+                bodyDef.gravityScale = rb2d.GravityScale;
+                
+                b2Body* body = m_PhysicsWorld->CreateBody(&bodyDef);
+                rb2d.RuntimeBody = body;
+                
+                if (entt.HasComponent<BoxCollider2DComponent>())
+                {
+                    auto& bc2d = entt.GetComponent<BoxCollider2DComponent>();
+                    
+                    b2PolygonShape boxShape;
+                    boxShape.SetAsBox((bc2d.Size.x / 2) * transform.Scale.x, (bc2d.Size.y / 2) * transform.Scale.y, b2Vec2(bc2d.Offset.x, bc2d.Offset.y), 0.0f);
+                    
+                    b2FixtureDef fixtureDef;
+                    fixtureDef.shape = &boxShape;
+                    fixtureDef.density = bc2d.Density;
+                    fixtureDef.friction = bc2d.Friction;
+                    fixtureDef.restitution = bc2d.Restitution;
+                    
+                    body->CreateFixture(&fixtureDef);
+                }
+                
+                // @TODO: Circle collider
+            }
+        }
+        
+        // lua scripts
+        {
+            auto view = m_Registry.view<LuaScriptComponent>();
+            for (auto handle : view)
+            {
+                Entity entt = {handle, this};
+                
+                ScriptingEngine::OnCreate(entt);
+            }
         }
     }
 
     void Scene::OnRuntimeEnd()
     {
+        delete m_PhysicsWorld;
+        m_PhysicsWorld = nullptr;
         // @TODO: script on destroy
         /*m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc) {
          //ScriptingEngine::OnDestroy(entity);
@@ -57,6 +108,8 @@ namespace Spectral {
 
     void Scene::OnUpdateRuntime(Timestep ts)
     {
+        // NOTE: Order is important script -> physics
+        
         // update scripts
         {
             // lua scripts
@@ -70,16 +123,42 @@ namespace Spectral {
             // @TODO: native scripts
         }
         
-        // update camera
+        // update physics
         {
-            auto view = m_Registry.view<CameraComponent>();
+            // using fewer iterations increases performance but accuracy gonna suffer
+            // @Note: maybe expose to some physics setting to change the precision
+            const int32_t velocityIteration = 6;
+            const int32_t positionIteration = 2;
+            
+            m_PhysicsWorld->Step(ts, velocityIteration, positionIteration);
+            
+            auto view = m_Registry.view<RigidBody2DComponent>();
             for (auto handle : view)
             {
-                Entity entt = { handle, this };
-                auto& camera = entt.GetComponent<CameraComponent>();
+                Entity entt = {handle, this};
+                
+                auto& rb2d = entt.GetComponent<RigidBody2DComponent>();
+                auto& transform = entt.GetComponent<TransformComponent>();
+                
+                b2Body* body = (b2Body*)rb2d.RuntimeBody;
+                
+                const auto& position = body->GetPosition();
+                transform.Translation.x = position.x;
+                transform.Translation.y = position.y;
+                transform.Rotation.z = body->GetAngle();
+            }
+        }
+        
+        // update camera
+        {
+            auto view = m_Registry.view<TransformComponent, CameraComponent>();
+            for (auto handle : view)
+            {
+                auto [transform, camera] = view.get<TransformComponent, CameraComponent>(handle);
                 
                 if (camera.Active) {
                     m_RuntimeCamera = camera.Camera;
+                    m_RuntimeCamera->SetTransform(transform.GetTransform());
                 } else {
                     m_RuntimeCamera = nullptr;
                 }
@@ -91,7 +170,7 @@ namespace Spectral {
     {
         if (m_RuntimeCamera)
         {
-            BeginMode3D(m_RuntimeCamera->GetCamera3D());
+            BeginMode3DM(m_RuntimeCamera->GetCamera3D(), m_RuntimeCamera->GetTransform());
             
                 // draw sprites
                 {
@@ -99,12 +178,8 @@ namespace Spectral {
                     for (auto handle : view)
                     {
                         auto [transform, sprite] = view.get<TransformComponent, SpriteComponent>(handle);
-                        
-                        transform.PushMatrix();
-                        
-                        Renderer::RenderTexturedPlane(sprite.SpriteTexture, sprite.Tint);
-                        
-                        transform.PopMatrix();
+                    
+                        Renderer::RenderTexturedPlane(sprite.SpriteTexture, transform.GetTransform(), sprite.Tint);
                     }
                 }
             
@@ -114,12 +189,11 @@ namespace Spectral {
                     for (auto handle : view)
                     {
                         auto [transform, model] = view.get<TransformComponent, ModelComponent>(handle);
+
+                        model.ModelData.transform = transform.GetTransform();
                         
-                        transform.PushMatrix();
-                        
-                            DrawModel(model.ModelData, (Vector3){0.0f, 2.0f, 0.0f}, 1.0f, WHITE); // @TODO: Temp
-                        
-                        transform.PopMatrix();
+                        // @Note: do not modify position and scale values here, the transform matrix is paased from a model
+                        DrawModel(model.ModelData, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
                     }
                 }
             
@@ -128,47 +202,7 @@ namespace Spectral {
     }
 
     void Scene::OnUpdateEditor(Timestep ts)
-{
-        // @TODO: Temp solution to get bounds for sprites
-        auto view = m_Registry.view<SpriteComponent, TransformComponent>();
-        for (auto handle : view)
-        {
-            // Update sprites bounds
-            auto [transform, sprite] = view.get<TransformComponent, SpriteComponent>(handle);
-            
-            Vector3 position;
-            Vector2 size;
-            Vector3 rotation;
-            
-            position = transform.Translation;
-            size = (Vector2){(float)sprite.SpriteTexture.width * transform.Scale.x, (float)sprite.SpriteTexture.height * transform.Scale.z};
-            rotation = transform.Rotation;
-            
-            sprite.Bounds[0] = (Vector3){position.x - size.x / 2, position.y, position.z - size.y / 2};        // Top left corner
-            sprite.Bounds[1] = (Vector3){position.x + size.x / 2, position.y, position.z - size.y / 2};        // Top right corner
-            sprite.Bounds[2] = (Vector3){position.x + size.x / 2, position.y, position.z + size.y / 2};        // Bottom right corner
-            sprite.Bounds[3] = (Vector3){position.x - size.x / 2, position.y, position.z + size.y / 2};        // Bottom left corner
-            
-            // Only calculate if we have some rotation values
-            if (rotation.x != 0.0f || rotation.y != 0.0f || rotation.z != 0.0f)
-            {
-                Matrix rotX = MatrixRotateX(rotation.x * DEG2RAD);
-                Matrix rotY = MatrixRotateY(rotation.y * DEG2RAD);
-                Matrix rotZ = MatrixRotateZ(rotation.z * DEG2RAD);
-                
-                // Combine the rotation matrices (rotZ * (rotY * rotX))
-                Matrix rotationMatrix = MatrixMultiply(rotZ, MatrixMultiply(rotY, rotX));
-                
-                // Apply the combined rotation matrix to each corner
-                for (int i = 0; i < 4; ++i)
-                {
-                    Vector3 corner = (Vector3){sprite.Bounds[i].x - position.x, sprite.Bounds[i].y - position.y, sprite.Bounds[i].z - position.z};
-                    Vector3 transformed = Vector3Transform(corner, rotationMatrix);
-                    sprite.Bounds[i] = (Vector3){transformed.x + position.x, transformed.y + position.y, transformed.z + position.z};
-                }
-            }
-        }
-        
+    {
     }
 
     void Scene::OnRenderEditor(EditorCamera& camera)
@@ -185,17 +219,10 @@ namespace Spectral {
                 {
                     auto [transform, sprite] = view.get<TransformComponent, SpriteComponent>(handle);
                     
-                    transform.PushMatrix();
+                    Renderer::RenderTexturedPlane(sprite.SpriteTexture, transform.GetTransform(), sprite.Tint);
                     
-                        Renderer::RenderTexturedPlane(sprite.SpriteTexture, sprite.Tint);
-                    
-                    transform.PopMatrix();
-                    
-                    // @TODO: DEBUG ONLY, delete this later
-                    DrawLine3D(sprite.Bounds[0], sprite.Bounds[1], VIOLET);
-                    DrawLine3D(sprite.Bounds[1], sprite.Bounds[2], VIOLET);
-                    DrawLine3D(sprite.Bounds[2], sprite.Bounds[3], VIOLET);
-                    DrawLine3D(sprite.Bounds[3], sprite.Bounds[0], VIOLET);
+                    // @DEBUG
+                    DrawCubeWiresM(transform.GetTransform(), (Vector3){50.0f, 50.0f ,1.0f}, VIOLET);
                 }
             }
         
@@ -206,11 +233,13 @@ namespace Spectral {
                 {
                     auto [transform, model] = view.get<TransformComponent, ModelComponent>(handle);
                     
-                    transform.PushMatrix();
+                    model.ModelData.transform = transform.GetTransform();
                     
-                        DrawModel(model.ModelData, (Vector3){0.0f, 2.0f, 0.0f}, 1.0f, WHITE); // @TODO: Temp
+                    // @Note: do not modify position and scale values here, the transform matrix is paased from a model
+                    DrawModel(model.ModelData, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
                     
-                    transform.PopMatrix();
+                    // @DEBUG
+                    ///DrawBoundingBox(GetMeshBoundingBox(model.ModelData.meshes[0]), VIOLET);
                 }
             }
         

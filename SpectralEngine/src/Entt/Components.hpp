@@ -9,6 +9,7 @@
 #include "pch.h"
 
 #include "raylib.h"
+#include "raymath.h"
 #include "rlgl.h"
 #include "sol.hpp"
 
@@ -33,23 +34,22 @@ namespace Spectral {
         Vector3 Rotation    = {0.0f, 0.0f, 0.0f};
         Vector3 Scale       = {1.0f, 1.0f, 1.0f};
         
-        void PushMatrix()
+        
+        Matrix GetTransform() const
         {
-            rlPushMatrix();
-            rlTranslatef(Translation.x, Translation.y, Translation.z);
-            rlRotatef(Rotation.x, 1, 0, 0);
-            rlRotatef(Rotation.y, 0, 1, 0);
-            rlRotatef(Rotation.z, 0, 0, 1);
-            rlScalef(Scale.x, Scale.y, Scale.z);
+            // calculate transformation matrix (scale * rotate * translate)
+            Matrix rotation = MatrixRotateZYX(Rotation);
+
+            return MatrixMultiply(MatrixMultiply(MatrixScale(Scale.x, Scale.y, Scale.z), rotation)
+                                  , MatrixTranslate(Translation.x, Translation.y, Translation.z));
         }
-        void PopMatrix() { rlPopMatrix(); }        
     };
 
     struct SpriteComponent
     {
         Texture2D SpriteTexture;
         Vector4   Tint = {1.0f, 1.0f, 1.0f, 1.0f};
-        Vector3   Bounds[4];
+        Vector3   Bounds[4]; // @TODO: we actually don't need this anymore, after fixing transform component
     };
 
     struct ModelComponent
@@ -58,6 +58,28 @@ namespace Spectral {
         Texture2D Materials[4];
         Vector4   Tint;
         bool      Transparency = false;
+    };
+
+    struct RigidBody2DComponent
+    {
+        enum class BodyType { Static = 0, Kinematic, Dynamic };
+        BodyType Type = BodyType::Static;
+        bool FixedRotation = false;
+        bool AllowSleep = true;
+        bool Awake = true;
+        float GravityScale = 1.0f;
+        
+        void* RuntimeBody = nullptr;
+    };
+
+    struct BoxCollider2DComponent
+    {
+        Vector2 Offset = {0.0f, 0.0f};
+        Vector2 Size = {50.0f, 50.0f};
+        
+        float Density = 1.0f;
+        float Friction = 0.5f;
+        float Restitution = 0.0f;
     };
 
     struct HDRIComponent

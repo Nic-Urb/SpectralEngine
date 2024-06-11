@@ -27,7 +27,8 @@ project "SpectralEngine"
         "%{IncludeDir.imgui}",
         "%{IncludeDir.entt}",
         "%{IncludeDir.yaml_cpp}",
-        "%{IncludeDir.imguizmo}"
+        "%{IncludeDir.imguizmo}",
+        "%{IncludeDir.box2d}"
     }
 
     --filter "files::vendor/ImGuizmo/**.cpp"
@@ -55,5 +56,6 @@ project "SpectralEngine"
     links {
         "lua",
         "imgui",
-        "yaml-cpp"
+        "yaml-cpp",
+        "box2d"
     }

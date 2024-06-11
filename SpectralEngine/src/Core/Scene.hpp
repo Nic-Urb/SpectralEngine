@@ -14,6 +14,8 @@
 
 #include "entt.hpp"
 
+class b2World;
+
 namespace Spectral {
 
     class Entity; // fwd declaration
@@ -46,6 +48,8 @@ namespace Spectral {
         std::unordered_map<UUID, entt::entity> m_EntityMap;
         std::shared_ptr<RuntimeCamera> m_RuntimeCamera;
         std::string m_Name;
+        
+        b2World* m_PhysicsWorld = nullptr;
         
         // allow access to private members
         friend class Entity;

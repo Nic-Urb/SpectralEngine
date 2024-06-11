@@ -113,6 +113,29 @@ namespace Spectral {
         return out;
     }
 
+    static std::string RigidBody2DBodyTypeToString(RigidBody2DComponent::BodyType bodyType)
+    {
+        switch (bodyType)
+        {
+            case RigidBody2DComponent::BodyType::Static:    return "Static";
+            case RigidBody2DComponent::BodyType::Kinematic: return "Kinematic";
+            case RigidBody2DComponent::BodyType::Dynamic:   return "Dynamic";
+        }
+
+        // @TODO: ASSERT(false, "Unknown body type");
+        return {};
+    }
+
+    static RigidBody2DComponent::BodyType RigidBody2DBodyTypeFromString(const std::string& bodyTypeString)
+    {
+        if (bodyTypeString == "Static")    return RigidBody2DComponent::BodyType::Static;
+        if (bodyTypeString == "Kinematic") return RigidBody2DComponent::BodyType::Kinematic;
+        if (bodyTypeString == "Dynamic")   return RigidBody2DComponent::BodyType::Dynamic;
+    
+        // @TODO: ASSERT(false, "Unknown body type");
+        return RigidBody2DComponent::BodyType::Static;
+    }
+
     static void SerializeEntity(YAML::Emitter& out, Entity entt)
     {
         out << YAML::BeginMap; // Object
@@ -155,6 +178,34 @@ namespace Spectral {
             // @TODO: Serialize/Deserialize all data for model
             
             out << YAML::EndMap; // ModelComponent
+        }
+        
+        if (entt.HasComponent<RigidBody2DComponent>())
+        {
+            out << YAML::Key << "RigidBody2DComponent";
+            out << YAML::BeginMap; // RigidBody2DComponent
+            
+            auto& rb2c = entt.GetComponent<RigidBody2DComponent>();
+            out << YAML::Key << "Type" << YAML::Value << RigidBody2DBodyTypeToString(rb2c.Type);
+            out << YAML::Key << "FixedRotation" << YAML::Value << rb2c.FixedRotation;
+            out << YAML::Key << "AllowSleep" << YAML::Value << rb2c.AllowSleep;
+            out << YAML::Key << "Awake" << YAML::Value << rb2c.Awake;
+            out << YAML::Key << "GravityScale" << YAML::Value << rb2c.GravityScale;
+            
+            out << YAML::EndMap; // RigidBody2DComponent
+        }
+        
+        if (entt.HasComponent<BoxCollider2DComponent>())
+        {
+            out << YAML::Key << "BoxCollider2DComponent";
+            out << YAML::BeginMap; // BoxCollider2DComponent
+            
+            auto& bc2d = entt.GetComponent<BoxCollider2DComponent>();
+            out << YAML::Key << "Density" << YAML::Value << bc2d.Density;
+            out << YAML::Key << "Friction" << YAML::Value << bc2d.Friction;
+            out << YAML::Key << "Restitution" << YAML::Value << bc2d.Restitution;
+            
+            out << YAML::EndMap; // BoxCollider2DComponent
         }
         
         if (entt.HasComponent<CameraComponent>())
@@ -271,6 +322,26 @@ namespace Spectral {
                     if (!modelPath.empty()) {
                         mc.ModelData = *AssetsManager::LoadModel(modelPath).get();
                     }
+                }
+                
+                auto rigidBody2DComponent = entity["RigidBody2DComponent"];
+                if (rigidBody2DComponent)
+                {
+                    auto& rb2d = entt.GetOrAddComponent<RigidBody2DComponent>();
+                    rb2d.Type = RigidBody2DBodyTypeFromString(rigidBody2DComponent["Type"].as<std::string>());
+                    rb2d.FixedRotation = rigidBody2DComponent["FixedRotation"].as<bool>();
+                    rb2d.AllowSleep = rigidBody2DComponent["AllowSleep"].as<bool>();
+                    rb2d.Awake = rigidBody2DComponent["Awake"].as<bool>();
+                    rb2d.GravityScale = rigidBody2DComponent["GravityScale"].as<float>();
+                }
+                
+                auto boxCollider2DComponent = entity["BoxCollider2DComponent"];
+                if (boxCollider2DComponent)
+                {
+                    auto& bc2d = entt.GetOrAddComponent<BoxCollider2DComponent>();
+                    bc2d.Density = boxCollider2DComponent["Density"].as<float>();
+                    bc2d.Friction = boxCollider2DComponent["Friction"].as<float>();
+                    bc2d.Restitution = boxCollider2DComponent["Restitution"].as<float>();
                 }
                 
                 auto cameraComponent = entity["CameraComponent"];

@@ -1,0 +1,50 @@
+Scene: Box2D
+Entities:
+  - ID: 2892827314602318139
+    Name: Cube
+    TransformComponent:
+      Translation: [0.755992115, 48.6108971, 0]
+      Rotation: [0, -0, -0.785397053]
+      Scale: [0.300000012, 0.300000012, 1]
+    SpriteComponent:
+      Texture: ""
+      Tint: [1, 1, 1, 1]
+    RigidBody2DComponent:
+      Type: Dynamic
+      FixedRotation: false
+      AllowSleep: true
+      Awake: true
+      GravityScale: 9.80000019
+    BoxCollider2DComponent:
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.769999981
+  - ID: 16651277872803327816
+    Name: Camera
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Active: true
+      Projection: 1
+      FOV: 88.1999969
+  - ID: 15056696827098630652
+    Name: Wall
+    TransformComponent:
+      Translation: [0, -21.4895744, 0]
+      Rotation: [0, -0, 0]
+      Scale: [2.61133313, 0.173265681, 1]
+    SpriteComponent:
+      Texture: ""
+      Tint: [1, 1, 1, 1]
+    RigidBody2DComponent:
+      Type: Static
+      FixedRotation: false
+      AllowSleep: true
+      Awake: true
+      GravityScale: 1
+    BoxCollider2DComponent:
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
