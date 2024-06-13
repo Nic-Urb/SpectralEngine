@@ -92,16 +92,18 @@ namespace Spectral {
                 m_CurrentGizmo = ImGuizmo::OPERATION::ROTATE;
             }
         }
-        
-        // draw texture internally before the drawing phase
+    }
+
+    void EditorLayer::OnRender()
+    {
         BeginTextureMode(m_Framebuffer);
-            ClearBackground(BLACK); // swap buffers
-            if (m_CurrentState == SceneState::Edit)
-            {
-                m_ActiveScene->OnRenderEditor(m_EditorCamera);
-            } else {
-                m_ActiveScene->OnRenderRuntime();
-            }
+                ClearBackground(BLACK); // swap buffers
+                if (m_CurrentState == SceneState::Edit)
+                {
+                    m_ActiveScene->OnRenderEditor(m_EditorCamera);
+                } else {
+                    m_ActiveScene->OnRenderRuntime();
+                }
         EndTextureMode();
     }
     
@@ -391,12 +393,16 @@ namespace Spectral {
             }
             
             // Send collision info to stats panel
-            m_StatsPanel.SetCollisionInfo(m_CollisionInfo, m_SelectedEntity ? m_SelectedEntity.GetName() : "");
+            m_StatsPanel.SetCollisionInfo(m_CollisionInfo, m_SelectedEntity ? m_SelectedEntity.GetComponent<IDComponent>().Name : "");
         }
     }
     
     void EditorLayer::OnRuntimeStart()
     {
+        if (m_CurrentState == SceneState::Play) {
+            return;
+        }
+        
         m_CurrentState = SceneState::Play;
         
         // m_ActiveScene = new Scene();
@@ -405,6 +411,10 @@ namespace Spectral {
     
     void EditorLayer::OnRuntimeStop()
     {
+        if (m_CurrentState == SceneState::Edit) {
+            return;
+        }
+        
         m_CurrentState = SceneState::Edit;
         
         // m_ActiveScene = EditorScene;

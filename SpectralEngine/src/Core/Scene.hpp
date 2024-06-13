@@ -29,8 +29,8 @@ namespace Spectral {
         Entity CreateEntity(UUID uuid, const std::string& name);
         void RemoveEntity(Entity entity);
         
-        void OnRuntimeStart(); // @TODO: Call this
-        void OnRuntimeEnd(); // @TODO: Call this
+        void OnRuntimeStart();
+        void OnRuntimeEnd();
         // OnRuntimePause() @TODO: Implement this
         
         void OnUpdateRuntime(Timestep ts);

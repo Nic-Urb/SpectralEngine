@@ -28,8 +28,10 @@ project "SpectralEditor"
         "%{IncludeDir.yaml_cpp}",
         "%{IncludeDir.imguizmo}",
         "%{IncludeDir.tinyfiledialogs}",
-        "%{IncludeDir.box2d}"
+        "%{IncludeDir.box2d}",
+        "%{IncludeDir.joltPhysics}"
     }
+
 
     filter "action:xcode4"
         --pchheader ""

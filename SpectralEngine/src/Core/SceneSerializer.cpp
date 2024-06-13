@@ -140,8 +140,10 @@ namespace Spectral {
     {
         out << YAML::BeginMap; // Object
         
-        out << YAML::Key << "ID" << YAML::Value << entt.GetUUID();
-        out << YAML::Key << "Name" << YAML::Value << entt.GetName();
+        auto& idc = entt.GetComponent<IDComponent>();
+        out << YAML::Key << "ID" << YAML::Value << idc.ID;
+        out << YAML::Key << "Name" << YAML::Value << idc.Name;
+        out << YAML::Key << "LayerMask" << YAML::Value << idc.LayerMask;
         
         if (entt.HasComponent<TransformComponent>())
         {
@@ -175,6 +177,7 @@ namespace Spectral {
             
             auto& mc = entt.GetComponent<ModelComponent>();
             out << YAML::Key << "Model" << YAML::Value << AssetsManager::GetModelPath(mc.ModelData);
+            out << YAML::Key << "Tint" << YAML::Value << mc.Tint;
             // @TODO: Serialize/Deserialize all data for model
             
             out << YAML::EndMap; // ModelComponent
@@ -206,6 +209,36 @@ namespace Spectral {
             out << YAML::Key << "Restitution" << YAML::Value << bc2d.Restitution;
             
             out << YAML::EndMap; // BoxCollider2DComponent
+        }
+        
+        if (entt.HasComponent<RigidBody3DComponent>())
+        {
+            out << YAML::Key << "RigidBody3DComponent";
+            out << YAML::BeginMap; // RigidBody3DComponent
+            
+            auto& rb3c = entt.GetComponent<RigidBody3DComponent>();
+            out << YAML::Key << "Type" << YAML::Value << RigidBody2DBodyTypeToString((RigidBody2DComponent::BodyType)rb3c.Type);
+            out << YAML::Key << "AllowSleep" << YAML::Value << rb3c.AllowSleep;
+            out << YAML::Key << "Awake" << YAML::Value << rb3c.Awake;
+            out << YAML::Key << "Mass" << YAML::Value << rb3c.Mass;
+            out << YAML::Key << "LinearDrag" << YAML::Value << rb3c.LinearDrag;
+            out << YAML::Key << "AngularDrag" << YAML::Value << rb3c.AngularDrag;
+            out << YAML::Key << "GravityScale" << YAML::Value << rb3c.GravityScale;
+            
+            out << YAML::EndMap; // RigidBody3DComponent
+        }
+        
+        if (entt.HasComponent<BoxCollider3DComponent>())
+        {
+            out << YAML::Key << "BoxCollider3DComponent";
+            out << YAML::BeginMap; // BoxCollider3DComponent
+            
+            auto& bc3d = entt.GetComponent<BoxCollider3DComponent>();
+            out << YAML::Key << "Density" << YAML::Value << bc3d.Density;
+            out << YAML::Key << "Friction" << YAML::Value << bc3d.Friction;
+            out << YAML::Key << "Restitution" << YAML::Value << bc3d.Restitution;
+            
+            out << YAML::EndMap; // BoxCollider3DComponent
         }
         
         if (entt.HasComponent<CameraComponent>())
@@ -292,6 +325,8 @@ namespace Spectral {
                 
                 auto entt = m_Scene->CreateEntity(uuid, name);
                 
+                entt.GetComponent<IDComponent>().LayerMask = entity["LayerMask"].as<uint16_t>();
+                
                 SP_LOG_INFO("Deserializing object : {0}, {1}", uuid, name);
                 
                 auto transformComponent = entity["TransformComponent"];
@@ -321,6 +356,7 @@ namespace Spectral {
                     auto modelPath = modelComponent["Model"].as<std::string>();
                     if (!modelPath.empty()) {
                         mc.ModelData = *AssetsManager::LoadModel(modelPath).get();
+                        mc.Tint = modelComponent["Tint"].as<Vector4>();
                     }
                 }
                 
@@ -342,6 +378,28 @@ namespace Spectral {
                     bc2d.Density = boxCollider2DComponent["Density"].as<float>();
                     bc2d.Friction = boxCollider2DComponent["Friction"].as<float>();
                     bc2d.Restitution = boxCollider2DComponent["Restitution"].as<float>();
+                }
+                
+                auto rigidBody3DComponent = entity["RigidBody3DComponent"];
+                if (rigidBody3DComponent)
+                {
+                    auto& rb3d = entt.GetOrAddComponent<RigidBody3DComponent>();
+                    rb3d.Type = (RigidBody3DComponent::BodyType)RigidBody2DBodyTypeFromString(rigidBody3DComponent["Type"].as<std::string>());
+                    rb3d.AllowSleep = rigidBody3DComponent["AllowSleep"].as<bool>();
+                    rb3d.Awake = rigidBody3DComponent["Awake"].as<bool>();
+                    rb3d.Mass = rigidBody3DComponent["Mass"].as<float>();
+                    rb3d.LinearDrag = rigidBody3DComponent["LinearDrag"].as<float>();
+                    rb3d.AngularDrag = rigidBody3DComponent["AngularDrag"].as<float>();
+                    rb3d.GravityScale = rigidBody3DComponent["GravityScale"].as<float>();
+                }
+                
+                auto boxCollider3DComponent = entity["BoxCollider3DComponent"];
+                if (boxCollider3DComponent)
+                {
+                    auto& bc3d = entt.GetOrAddComponent<BoxCollider3DComponent>();
+                    bc3d.Density = boxCollider3DComponent["Density"].as<float>();;
+                    bc3d.Friction = boxCollider3DComponent["Friction"].as<float>();;
+                    bc3d.Restitution = boxCollider3DComponent["Restitution"].as<float>();;
                 }
                 
                 auto cameraComponent = entity["CameraComponent"];

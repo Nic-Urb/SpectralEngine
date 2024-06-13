@@ -2,6 +2,7 @@ Scene: Box2D
 Entities:
   - ID: 2892827314602318139
     Name: Cube
+    LayerMask: 1
     TransformComponent:
       Translation: [0.755992115, 48.6108971, 0]
       Rotation: [0, -0, -0.785397053]
@@ -21,6 +22,7 @@ Entities:
       Restitution: 0.769999981
   - ID: 16651277872803327816
     Name: Camera
+    LayerMask: 1
     TransformComponent:
       Translation: [0, 0, 0]
       Rotation: [0, -0, 0]
@@ -31,6 +33,7 @@ Entities:
       FOV: 88.1999969
   - ID: 15056696827098630652
     Name: Wall
+    LayerMask: 1
     TransformComponent:
       Translation: [0, -21.4895744, 0]
       Rotation: [0, -0, 0]

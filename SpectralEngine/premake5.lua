@@ -28,8 +28,13 @@ project "SpectralEngine"
         "%{IncludeDir.entt}",
         "%{IncludeDir.yaml_cpp}",
         "%{IncludeDir.imguizmo}",
-        "%{IncludeDir.box2d}"
+        "%{IncludeDir.box2d}",
+        "%{IncludeDir.joltPhysics}"
     }
+
+    sysincludedirs {
+		"%{IncludeDir.joltPhysics}"
+	}
 
     --filter "files::vendor/ImGuizmo/**.cpp"
       --  flags {"NoPCH"}
@@ -57,5 +62,6 @@ project "SpectralEngine"
         "lua",
         "imgui",
         "yaml-cpp",
-        "box2d"
+        "box2d",
+        "JoltPhysics"
     }

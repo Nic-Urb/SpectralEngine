@@ -68,10 +68,6 @@ namespace Spectral {
             }
             return false;
         }
-        
-        UUID GetUUID() { return GetComponent<IDComponent>().ID; }
-        const std::string& GetName() { return GetComponent<IDComponent>().Name; }
-        void SetName(const std::string& name) { GetComponent<IDComponent>().Name = name; }
 
         operator entt::entity() const { return m_EnttHandle; }
         operator bool() const { return m_EnttHandle != entt::null; }

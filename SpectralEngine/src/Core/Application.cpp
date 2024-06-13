@@ -28,11 +28,13 @@ namespace Spectral {
         // m_ImGuiLayer = new ImGuiLayer();
         // PushOverlay(m_ImGuiLayer);
         ScriptingEngine::Init();
+        //Shaders::LoadShaders();
     }
 
     Application::~Application()
     {
         SP_LOG_INFO("Engine::Shutdown");
+        //Shaders::UnloadShaders();
     }
 
     void Application::Run()

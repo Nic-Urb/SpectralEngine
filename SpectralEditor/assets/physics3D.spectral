@@ -1,0 +1,57 @@
+Scene: physics3D
+Entities:
+  - ID: 12276223796222272855
+    Name: floor
+    LayerMask: 2
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [50, 1, 50]
+    ModelComponent:
+      Model: assets/cube.obj
+      Tint: [1, 1, 1, 1]
+    RigidBody3DComponent:
+      Type: Static
+      AllowSleep: true
+      Awake: true
+      Mass: 1
+      LinearDrag: 0
+      AngularDrag: 0
+      GravityScale: 1
+    BoxCollider3DComponent:
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+  - ID: 5372768975790114063
+    Name: camera
+    LayerMask: 1
+    TransformComponent:
+      Translation: [0, -8.25, -104.599998]
+      Rotation: [-0.328121722, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Active: true
+      Projection: 0
+      FOV: 58.2000008
+  - ID: 5929545942014320036
+    Name: cube
+    LayerMask: 2
+    TransformComponent:
+      Translation: [0, 64.9464493, 0]
+      Rotation: [0, -0, 0.785398185]
+      Scale: [10, 10, 10]
+    ModelComponent:
+      Model: assets/cube.obj
+      Tint: [1, 0, 0.895161152, 1]
+    RigidBody3DComponent:
+      Type: Dynamic
+      AllowSleep: true
+      Awake: true
+      Mass: 1
+      LinearDrag: 0
+      AngularDrag: 0
+      GravityScale: 9.80000019
+    BoxCollider3DComponent:
+      Density: 1
+      Friction: 0.5
+      Restitution: 0

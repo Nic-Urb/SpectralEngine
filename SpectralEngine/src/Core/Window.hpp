@@ -31,7 +31,7 @@ namespace Spectral {
         
     private:
         
-        std::string m_Name;// = "[Undefined window name - Application]";
+        std::string m_Name;// = "[Undefined window name - Application]"; // @TODO: Remove
         uint32_t m_ScreenWidth;// = 800;
         uint32_t m_ScreenHeight;// = 450;
         bool m_VSync;

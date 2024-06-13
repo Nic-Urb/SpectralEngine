@@ -24,7 +24,8 @@ project "Sandbox"
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.entt}",
         "%{IncludeDir.imgui}",
-        "%{IncludeDir.box2d}"
+        "%{IncludeDir.box2d}",
+        "%{IncludeDir.joltPhysics}"
     }
 
     filter "action:xcode4"

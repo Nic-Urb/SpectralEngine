@@ -80,6 +80,7 @@ IncludeDir["yaml_cpp"] = "%{wks.location}/SpectralEngine/vendor/yaml-cpp/include
 IncludeDir["imguizmo"] = "%{wks.location}/SpectralEngine/vendor/ImGuizmo"
 IncludeDir["tinyfiledialogs"] = "%{wks.location}/SpectralEngine/vendor/tinyfiledialogs"
 IncludeDir["box2d"] = "%{wks.location}/SpectralEngine/vendor/box2d/include"
+IncludeDir["joltPhysics"] = "%{wks.location}/SpectralEngine/vendor/JoltPhysics"
 
 group "Dependencies"
     include ("raylib_premake5.lua")
@@ -87,6 +88,7 @@ group "Dependencies"
     include ("SpectralEngine/vendor/yaml-cpp")
     include ("SpectralEngine/vendor/lua")
     include ("SpectralEngine/vendor/box2d")
+    include ("SpectralEngine/vendor/JoltPhysics")
 
 group "Core"
     include ("SpectralEngine")

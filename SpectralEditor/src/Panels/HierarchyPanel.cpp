@@ -104,7 +104,8 @@ namespace Spectral {
     {
         ImGuiTreeNodeFlags flags = ((m_SelectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
         flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-        bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, entity.GetName().c_str());
+        const char* name = entity.GetComponent<IDComponent>().Name.c_str();
+        bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, name);
         
         if (ImGui::IsItemClicked())
         {
@@ -114,7 +115,7 @@ namespace Spectral {
         bool removeNode = false;
         if (ImGui::BeginPopupContextItem(0))
         {
-            if (ImGui::MenuItem("Delete ", entity.GetName().c_str())) {
+            if (ImGui::MenuItem("Delete ", name)) {
                 removeNode = true;
             }
             ImGui::EndPopup();
@@ -123,7 +124,7 @@ namespace Spectral {
         if (opened)
         {
             ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-            bool opened = ImGui::TreeNodeEx((void*)9817239, flags, entity.GetName().c_str()); // (void*)9817239 some random id just for testing
+            bool opened = ImGui::TreeNodeEx((void*)9817239, flags, name); // (void*)9817239 some random id just for testing
             if (opened)
             {
                 ImGui::TreePop();
@@ -146,30 +147,54 @@ namespace Spectral {
 
     void HierarchyPanel::DrawProperties() 
     {
-        ImGui::Text(ICON_MD_VIEW_IN_AR);
-        ImGui::SameLine();
-        
-        const std::string& name = m_SelectedEntity.GetName();
-        char buffer[64];
-        strncpy(buffer, name.c_str(), sizeof(buffer));
-        ImGui::SameLine();
-        ImGui::PushItemWidth(145.0f);
-        if (ImGui::InputText("##Name", buffer, sizeof(buffer)))
+        // setup component general
         {
-            m_SelectedEntity.SetName(buffer);
+            auto& idc = m_SelectedEntity.GetComponent<IDComponent>();
+            
+            ImGui::Text(ICON_MD_VIEW_IN_AR);
+            ImGui::SameLine();
+            
+            const std::string& name = idc.Name;
+            char buffer[64];
+            strncpy(buffer, name.c_str(), sizeof(buffer));
+            ImGui::SameLine();
+            ImGui::PushItemWidth(145.0f);
+            if (ImGui::InputText("##Name", buffer, sizeof(buffer)))
+            {
+                idc.Name = buffer;
+            }
+            ImGui::PopItemWidth();
+            
+            ImGui::SameLine();
+            
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.78f, 0.0f, 1.0f));
+            
+            if (ImGui::Button("Add Component")) {
+                ImGui::OpenPopup("AddComponent");
+            }
+            
+            ImGui::PopStyleColor();
+            
+            const char* layerMaskStrings[] = { "Static", "Default", "Custom1", "Custom2"};
+            const char* currentLayerMaskString = layerMaskStrings[(uint16_t)idc.LayerMask];
+            if (ImGui::BeginCombo("LayerMask", currentLayerMaskString))
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    bool isSelected = currentLayerMaskString == layerMaskStrings[i];
+                    if (ImGui::Selectable(layerMaskStrings[i], isSelected))
+                    {
+                        currentLayerMaskString = layerMaskStrings[i];
+                        idc.LayerMask = (uint16_t)i;
+                    }
+                    
+                    if (isSelected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                
+                ImGui::EndCombo();
+            }
         }
-        ImGui::PopItemWidth();
-        
-        ImGui::SameLine();
-        
-        
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.78f, 0.0f, 1.0f));
-        
-        if (ImGui::Button("Add Component")) {
-            ImGui::OpenPopup("AddComponent");
-        }
-        
-        ImGui::PopStyleColor();
         
         if (ImGui::BeginPopup("AddComponent"))
         {
@@ -179,7 +204,9 @@ namespace Spectral {
             DisplayAddComponentEntry<ModelComponent>("Model");
             DisplayAddComponentEntry<LuaScriptComponent>("Lua Script");
             DisplayAddComponentEntry<RigidBody2DComponent>("Rigidbody 2D");
-            DisplayAddComponentEntry<BoxCollider2DComponent>("Box Collider 2D");
+            DisplayAddComponentEntry<BoxCollider2DComponent>("BoxCollider 2D");
+            DisplayAddComponentEntry<RigidBody3DComponent>("Rigidbody 3D");
+            DisplayAddComponentEntry<BoxCollider3DComponent>("BoxCollider 3D");
             
             ImGui::EndPopup();
         }
@@ -245,15 +272,17 @@ namespace Spectral {
             
             if (ImGui::BeginDragDropTarget()) 
             {
-                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("3D_PAYLOAD"))
+                if (const ImGuiPayload* payloadModel = ImGui::AcceptDragDropPayload("3D_PAYLOAD"))
                 {
-                    const char* path = (const char*)payload->Data;
+                    const char* path = (const char*)payloadModel->Data;
                     std::filesystem::path modelPath(path); // @TODO: We actually don't need this step - there is a implicit from const char* to std::string
                     component.ModelData = *AssetsManager::LoadModel(modelPath.string()).get();
                 }
                 
                 ImGui::EndDragDropTarget();
             }
+            
+            ImGui::ColorEdit4("Tint Color", (float*)&component.Tint, ImGuiColorEditFlags_NoInputs);
         });
         
         DrawComponent<LuaScriptComponent>("LuaScript", /*calling anonymous function*/ [](auto& component) {
@@ -309,12 +338,51 @@ namespace Spectral {
             ImGui::DragFloat("Gravity Scale", &component.GravityScale, 0.01f, 0.0f);
         });
         
-        DrawComponent<BoxCollider2DComponent>("Box Collider 2D", /*calling anonymous function*/ [](auto& component) {
+        DrawComponent<BoxCollider2DComponent>("BoxCollider 2D", /*calling anonymous function*/ [](auto& component) {
             
                 //ImGui::DragFloat2("Size", ); // @TODO: Expose size and offset
                 ImGui::DragFloat("Density", &component.Density, 0.01f, 0.0f, 1.0f);
                 ImGui::DragFloat("Friction", &component.Friction, 0.01f, 0.0f, 1.0f);
                 ImGui::DragFloat("Restitution", &component.Restitution, 0.01f, 0.0f, 1.0f);
+        });
+        
+        DrawComponent<RigidBody3DComponent>("Rigidbody 3D", /*calling anonymous function*/ [](auto& component) {
+            
+            const char* bodyTypeStrings[] = { "Static", "Kinematic", "Dynamic"};
+            const char* currentBodyTypeString = bodyTypeStrings[(int)component.Type];
+            if (ImGui::BeginCombo("Body Type", currentBodyTypeString))
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    bool isSelected = currentBodyTypeString == bodyTypeStrings[i];
+                    if (ImGui::Selectable(bodyTypeStrings[i], isSelected))
+                    {
+                        currentBodyTypeString = bodyTypeStrings[i];
+                        component.Type = (RigidBody3DComponent::BodyType)i;
+                    }
+
+                    if (isSelected)
+                        ImGui::SetItemDefaultFocus();
+                }
+
+                ImGui::EndCombo();
+            }
+
+            ImGui::Checkbox("Allow Sleep", &component.AllowSleep);
+            ImGui::Checkbox("Awake", &component.Awake);
+            
+            
+            ImGui::DragFloat("Mass", &component.Mass, 0.01f, 0.0f);
+            ImGui::DragFloat("Linear Drag", &component.LinearDrag, 0.01f, 0.0f);
+            ImGui::DragFloat("Angular Drag", &component.AngularDrag, 0.01f, 0.0f);
+            ImGui::DragFloat("Gravity Scale", &component.GravityScale, 0.01f, 0.0f);
+        });
+        
+        DrawComponent<BoxCollider3DComponent>("BoxCollider 3D", /*calling anonymous function*/ [](auto& component) {
+            
+            ImGui::DragFloat("Density", &component.Density, 0.01f, 0.0f);
+            ImGui::DragFloat("Friction", &component.Friction, 0.01f, 0.0f);
+            ImGui::DragFloat("Restitution", &component.Restitution, 0.01f, 0.0f);
         });
         
         

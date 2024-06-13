@@ -36,6 +36,7 @@ namespace Spectral {
         }
     
         void OnUpdate(Timestep ts) override;
+        void OnRender() override;
         void OnImGuiRender() override;
     
     private:

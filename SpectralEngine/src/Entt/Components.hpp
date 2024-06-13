@@ -23,6 +23,7 @@ namespace Spectral {
     {
         UUID ID;
         std::string Name;
+        uint16_t LayerMask = 1; // used for physics 3d collision
         
         IDComponent(UUID uuid, const std::string& name)
                 : ID(uuid), Name(name) {}
@@ -54,11 +55,13 @@ namespace Spectral {
 
     struct ModelComponent
     {
+        // @TODO: add different culling modes
         Model     ModelData;
-        Texture2D Materials[4];
-        Vector4   Tint;
+        Vector4   Tint = {1.0, 1.0f, 1.0f, 1.0f};
         bool      Transparency = false;
     };
+
+    // 2D Physics
 
     struct RigidBody2DComponent
     {
@@ -82,8 +85,47 @@ namespace Spectral {
         float Restitution = 0.0f;
     };
 
-    struct HDRIComponent
+    // 3D Physics
+
+    struct RigidBody3DComponent
     {
+        enum class BodyType { Static = 0, Kinematic, Dynamic };
+        BodyType Type = BodyType::Static;
+        
+        bool AllowSleep = true;
+        bool Awake = true;
+        float Mass = 1.0f;
+        float LinearDrag = 0.0f;
+        float AngularDrag = 0.0f;
+        float GravityScale = 1.0f;
+        
+        void* RuntimeBody = nullptr;
+        
+        // @TODO: add more options (https://jrouwe.github.io/JoltPhysics/index.html#bodies)
+    };
+
+    struct BoxCollider3DComponent
+    {
+        Vector3 Offset = {0.0f, 0.0f, 0.0f};
+        
+        float Density = 1.0f;
+        float Friction = 0.5f;
+        float Restitution = 0.0f;
+    };
+
+    struct SphereCollider3DComponent
+    {
+        Vector3 Offset = {0.0f, 0.0f, 0.0f};
+        float Radius = 50.0f;
+                
+        float Density = 1.0f;
+        float Friction = 0.5f;
+        float Restitution = 0.0f;
+    };
+
+    struct WaterBuoyancy3DComponent // @SEE: https://github.com/jrouwe/JoltPhysics/tree/master/Samples/Tests/Water
+    {
+        float Density = 1.0f;
     };
 
     struct LightComponent
