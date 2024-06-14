@@ -18,6 +18,7 @@ namespace Spectral {
     {
         for (Layer* layer : m_Layers)
         {
+            layer->OnDetach();
             delete layer; // removes all pointers
         }
     }

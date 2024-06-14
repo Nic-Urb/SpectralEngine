@@ -31,7 +31,6 @@ namespace Spectral {
         
         void OnRuntimeStart();
         void OnRuntimeEnd();
-        // OnRuntimePause() @TODO: Implement this
         
         void OnUpdateRuntime(Timestep ts);
         void OnRenderRuntime();

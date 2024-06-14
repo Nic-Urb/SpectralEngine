@@ -14,22 +14,21 @@
 namespace Spectral {
     
     class Application
-{
-public:
-    
-    Application(const std::string& name);
-    virtual ~Application();
-    
-    void Run();
-    
-    void PushLayer(Layer* layer);
-    void PushOverlay(Layer* overlay);
-    
-    static Application& GetInstance() { return *s_Instance;}
-    
-    Window& GetWindow() { return *m_Window; }
-    
-    Timestep GetTimestep() const { return m_Timestep; }
+    {
+    public:
+        Application();
+        virtual ~Application();
+        
+        void Run();
+        
+        void PushLayer(Layer* layer);
+        void PushOverlay(Layer* overlay);
+        
+        static Application& GetInstance() { return *s_Instance;}
+        
+        Window& GetWindow() { return *m_Window; }
+        
+        Timestep GetTimestep() const { return m_Timestep; }
         
     private:
         static Application* s_Instance;

@@ -15,25 +15,9 @@
 namespace Spectral {
     class EditorLayer : public Layer
     {
-    public:
-        EditorLayer();
-        ~EditorLayer() override
-        {
-            UnloadRenderTexture(m_Framebuffer);
-        }
-        
-        inline void OnAttach() override
-        {
-            SP_CLIENT_LOG_INFO("EDITOR-APP::OnAttach");
-            // @TODO: On attach is never reached !!
-            // @TODO: Put init stuff in here ??
-        }
-    
-        inline void OnDetach() override
-        {
-            SP_CLIENT_LOG_INFO("EDITOR-APP::OnDetach"); // @TODO: Check if this function is even called
-            //UnloadRenderTexture(m_Framebuffer);
-        }
+    public:        
+        void OnAttach() override;
+        void OnDetach() override;
     
         void OnUpdate(Timestep ts) override;
         void OnRender() override;
@@ -46,10 +30,9 @@ namespace Spectral {
         std::shared_ptr<Scene> m_ActiveScene;
         EditorCamera m_EditorCamera;
     
-        // Panels where lifetime is tied to the EditorLayer class
         HierarchyPanel m_HierarchyPanel;
-        ContentBrowserPanel m_ContentBrowserPanel;
         StatisticsPanel m_StatsPanel;
+        std::unique_ptr<ContentBrowserPanel> m_ContentBrowserPanel;
     
         RenderTexture m_Framebuffer;
     

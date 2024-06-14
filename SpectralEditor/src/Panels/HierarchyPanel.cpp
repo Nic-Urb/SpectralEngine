@@ -66,21 +66,6 @@ namespace Spectral {
                     entity.AddComponent<CameraComponent>();
                 }
                 
-                if (ImGui::MenuItem("Actor"))
-                {
-                    Entity entity = m_Context->CreateEntity(UUID(), "Actor");
-                    // @TODO: Temp
-                    //entity.AddComponent<NativeScriptComponent>().Bind<PlayerController>();
-                    // @TODO: Add ScriptComponent
-                    // @TODO: Add Physics
-                }
-                
-                if (ImGui::MenuItem("Light"))
-                {
-                    m_Context->CreateEntity(UUID(), "Light");
-                    // @TODO: Add LightComponent
-                }
-                
                 ImGui::EndPopup();
             }
         }

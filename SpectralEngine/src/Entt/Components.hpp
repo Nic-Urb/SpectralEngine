@@ -50,7 +50,6 @@ namespace Spectral {
     {
         Texture2D SpriteTexture;
         Vector4   Tint = {1.0f, 1.0f, 1.0f, 1.0f};
-        Vector3   Bounds[4]; // @TODO: we actually don't need this anymore, after fixing transform component
     };
 
     struct ModelComponent
@@ -128,8 +127,19 @@ namespace Spectral {
         float Density = 1.0f;
     };
 
-    struct LightComponent
+    struct LightComponent // @TODO: Use with some light manager
     {
+        enum class LightType { Directional = 0, Point, Spot };
+        LightType Type;
+        
+        bool Enabled = true;
+        bool AllowTemperature = false;
+        
+        float Attenuation = 1.0f;
+        float Range = 1.0f;
+        float Temperature = 500.0f; // in kelvins
+        
+        Vector4 Color = {1.0f, 1.0f, 1.0f, 1.0f};
     };
 
     struct CameraComponent

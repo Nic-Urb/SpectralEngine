@@ -14,10 +14,8 @@ namespace Spectral {
     {
     public:
         
-        Window(const std::string& name, uint32_t width = 800, uint32_t height = 450);
+        Window(uint32_t width = 800, uint32_t height = 450);
         ~Window();
-        
-        void OnUpdate();
         
         uint32_t GetWidth() const { return m_ScreenWidth; }
         uint32_t GetHeight() const { return m_ScreenWidth; }
@@ -31,7 +29,6 @@ namespace Spectral {
         
     private:
         
-        std::string m_Name;// = "[Undefined window name - Application]"; // @TODO: Remove
         uint32_t m_ScreenWidth;// = 800;
         uint32_t m_ScreenHeight;// = 450;
         bool m_VSync;

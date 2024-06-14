@@ -29,7 +29,6 @@ namespace Spectral {
             SP_ASSERT(!HasComponent<T>(), "Entity already has this Component");
             
             T& component = m_SceneContext->m_Registry.emplace<T>(m_EnttHandle, std::forward<Args>(args)...);
-            //@TODO: call OnConstruct();
             return component;
         }
         
@@ -63,7 +62,6 @@ namespace Spectral {
         {
             if (HasComponent<T>()) {
                 m_SceneContext->m_Registry.remove<T>(m_EnttHandle);
-                // @TODO: call OnDestroy();
                 return true;
             }
             return false;

@@ -225,8 +225,6 @@ namespace Spectral {
                 Entity entt = {handle, this};
                 ScriptingEngine::OnUpdate(entt, ts);
             }
-            
-            // @TODO: native scripts
         }
         
         // update physics

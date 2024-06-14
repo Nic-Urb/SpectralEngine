@@ -10,8 +10,8 @@
 #include "materialdesign-main/IconsMaterialDesign.h"
 
 #include "Core/SceneSerializer.hpp"
-
 #include "Panels/StatisticsPanel.hpp"
+#include "Renderer/Shaders.hpp"
 
 #include "rlImGui.h"
 #include "imgui.h"
@@ -24,21 +24,25 @@
 
 namespace Spectral {
 
-    EditorLayer::EditorLayer()
+    void EditorLayer::OnAttach()
     {
-        // @TODO: Init all stuff OnAttach()
-        AssetsManager::LoadTexture("ressources/Play.png");
-        AssetsManager::LoadTexture("ressources/Stop.png");
+        SP_CLIENT_LOG_INFO("EDITOR-APP::OnAttach");
         
         m_ActiveScene = std::make_shared<Scene>("TestScene");
         
         m_EditorCamera = EditorCamera();
         m_HierarchyPanel= HierarchyPanel(m_ActiveScene);
-        m_ContentBrowserPanel = ContentBrowserPanel();
+        m_ContentBrowserPanel = std::make_unique<ContentBrowserPanel>();
         m_StatsPanel = StatisticsPanel(m_ActiveScene);
         
         m_Framebuffer = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
         SetTextureFilter(m_Framebuffer.texture, TEXTURE_FILTER_BILINEAR); // @TODO: Move
+    }
+
+    void EditorLayer::OnDetach()
+    {
+        SP_CLIENT_LOG_INFO("EDITOR-APP::OnDetach");
+        UnloadRenderTexture(m_Framebuffer);
     }
 
     void EditorLayer::OnUpdate(Timestep ts)
@@ -116,21 +120,19 @@ namespace Spectral {
         
         // render panels
         m_HierarchyPanel.OnImGuiRender();
-        m_ContentBrowserPanel.OnImGuiRender();
+        m_ContentBrowserPanel->OnImGuiRender();
         
         if (m_StatsPanel.IsActive()) {
             m_StatsPanel.OnImGuiRender();
         }
-        
-        //ImGui::ShowMetricsWindow(); // @TODO: flag display
-        
+
         // render viewport
         char buffer[128];
         std::string name = (m_CurrentState == SceneState::Edit) ? "Edit Mode" : "Play Mode";
         snprintf(buffer, sizeof(buffer), "%s (%s)###Viewport",m_ActiveScene->GetName().c_str() ,name.c_str());
         
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        ImGui::Begin(buffer, nullptr, ImGuiWindowFlags_NoScrollbar);
+        ImGui::Begin(buffer, nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBackground);
             m_ViewportFocused = ImGui::IsWindowHovered();
         
             ImVec2 viewportRegion = ImGui::GetContentRegionAvail();
@@ -138,9 +140,17 @@ namespace Spectral {
             // store viewport info
             m_ViewportRect = { ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMin().x, ImGui::GetWindowPos().y + ImGui::GetWindowContentRegionMin().y, viewportRegion.x, viewportRegion.y };
         
-            ImGui::Image((ImTextureID)&m_Framebuffer.texture, viewportRegion, ImVec2(0,1), ImVec2(1,0)); // render framebuffer to imgui viewport
+            // @NOTE: temporary workaround for shaders
+            BeginShaderMode(Shaders::GetLightingShader());
+                // render the framebuffer into a rectangle area and ensure it fits within the ImGui window
+                DrawTexturePro(m_Framebuffer.texture, (Rectangle){0, 0, (float)m_Framebuffer.texture.width, -(float)m_Framebuffer.texture.height}, m_ViewportRect, (Vector2){0, 0}, 0.0f, WHITE);
+            EndShaderMode();
         
-            if (ImGui::BeginDragDropTarget())
+            //ImGui::Image((ImTextureID)&m_Framebuffer.texture, viewportRegion, ImVec2(0,1), ImVec2(1,0)); // render framebuffer to imgui viewport
+        
+            ImRect dropTargetRect(ImVec2(m_ViewportRect.x, m_ViewportRect.y), ImVec2(m_ViewportRect.x + m_ViewportRect.width, m_ViewportRect.y + m_ViewportRect.height));
+        
+            if (ImGui::BeginDragDropTargetCustom(dropTargetRect, ImGui::GetID("ViewportDropTarget")))
             {
                 if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCENE_PAYLOAD"))
                 {
@@ -349,12 +359,12 @@ namespace Spectral {
            
                     auto& sprite = entt.GetComponent<SpriteComponent>();
                         
-                    RayCollision spriteCollision = GetRayCollisionQuad(mouseRay, sprite.Bounds[0], sprite.Bounds[1], sprite.Bounds[2], sprite.Bounds[3]);
+                    //RayCollision spriteCollision = GetRayCollisionQuad(mouseRay, sprite.Bounds[0], sprite.Bounds[1], sprite.Bounds[2], sprite.Bounds[3]);
                         
-                    if (spriteCollision.hit && spriteCollision.distance < collision.distance) {
+                    /*if (spriteCollision.hit && spriteCollision.distance < collision.distance) {
                         collision = spriteCollision;
                         m_SelectedEntity = entt;
-                    }
+                    }*/
                 }
             }
             

@@ -17,7 +17,7 @@
 
 namespace Spectral {
 
-    Window::Window(const std::string& name, uint32_t width, uint32_t height) : m_Name(name), m_ScreenWidth(width), m_ScreenHeight(height)
+    Window::Window(uint32_t width, uint32_t height) : m_ScreenWidth(width), m_ScreenHeight(height)
     {
         Init();
         
@@ -29,7 +29,6 @@ namespace Spectral {
     Window::~Window()
     {
         rlImGuiShutdown();
-        
         CloseWindow();
     }
 
@@ -37,7 +36,7 @@ namespace Spectral {
     {
         SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_UNDECORATED);
         
-        InitWindow(m_ScreenWidth, m_ScreenHeight, m_Name.c_str());
+        InitWindow(m_ScreenWidth, m_ScreenHeight, "");
         SetTargetFPS(60);
         SP_LOG_INFO("ENGINE::Creating window ({0}, {1})", m_ScreenWidth, m_ScreenHeight);
         
@@ -75,10 +74,6 @@ namespace Spectral {
         style.WindowRounding = 5.0f;
         style.FrameRounding = 5.0f;
         style.WindowBorderSize = 0.0f;
-    }
-
-    void Window::OnUpdate() 
-    {
     }
 
     void Window::SetVSync(bool enabled)

@@ -13,6 +13,7 @@
 #include "ImGuizmo.h"
 #include "raylib.h"
 
+#include "Renderer/Shaders.hpp"
 #include "Scripting/ScriptingEngine.hpp"
 
 
@@ -20,21 +21,21 @@ namespace Spectral {
 
     Application* Application::s_Instance = nullptr;
 
-    Application::Application(const std::string& name)
+    Application::Application()
     {
         s_Instance = this;
-        m_Window = std::make_unique<Window>(name);
+        m_Window = std::make_unique<Window>();
         
         // m_ImGuiLayer = new ImGuiLayer();
         // PushOverlay(m_ImGuiLayer);
         ScriptingEngine::Init();
-        //Shaders::LoadShaders();
+        Shaders::LoadShaders();
     }
 
     Application::~Application()
     {
         SP_LOG_INFO("Engine::Shutdown");
-        //Shaders::UnloadShaders();
+        Shaders::UnloadShaders();
     }
 
     void Application::Run()
@@ -71,18 +72,18 @@ namespace Spectral {
 
             EndDrawing();
         }
-        
-        //m_Window->OnUpdate();
     }
 
     void Application::PushLayer(Layer* layer)
     {
         m_LayerStack.PushLayer(layer);
+        layer->OnAttach();
     }
 
     void Application::PushOverlay(Layer* overlay)
     {
         m_LayerStack.PushOverlay(overlay);
+        overlay->OnAttach();
     }
 
 }
