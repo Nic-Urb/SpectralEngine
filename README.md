@@ -6,9 +6,7 @@
 ## About
 Spectral Engine is an in-development game engine written in C++.
 
-// add screenshots //
-
-// add showcase videos (yt private) // 
+<img width="1582" alt="Screenshot 2024-06-17 at 20 53 35" src="https://github.com/Nic-Urb/SpectralEngine/assets/79403684/3edf49f6-08b6-4ed0-8bea-7df67cf78aaa">
 
 ## Features
 
